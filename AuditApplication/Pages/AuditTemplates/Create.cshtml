@@ -7,33 +7,60 @@
 }
 
 
-<h2>Create New Audit Template</h2>
+<div class="container">
+    <h2>Create new template</h2>
+    
+    <div class="row mb-3">
+        <div class="col">
+            <button id="addSection" class="btn btn-primary">Add Section</button>
+            <button id="addQuestion" class="btn btn-secondary">Add Question</button>        
+        </div>
+    </div>
+    
+    <div class="row mb-3" id="templateTitleRow">
+        <div class="col-md-2">
+            <label for="templateTitle">Template Title:</label>
+        </div>
+        <div class="col-md-8">
+            <input type="text" class="form-control" id="templateTitle" placeholder="Enter template title">
+        </div>
+        <div class="col-md-2">
+            <button id="saveTemplate" class="btn btn-success">Save</button>
+        </div>
+    </div>
+    
+    <div id="templateTitleDisplay" style="display:none;">
+        <h3 id="displayedTemplateTitle"></h3>
+        <a href="#" id="editTemplateTitle">Edit</a>
+    </div>
 
-<div class="form-container">
-    <div class="form-group">
-        <label for="templateTitle">Template Title:</label>
-        <input type="text" class="form-control" id="templateTitle" placeholder="Enter template title">
-        <button id="saveTemplate" class="btn btn-default">Save</button>
+    <div id="sectionInput" class="row mb-3" style="display:none;">
+        <div class="col-md-2">
+            <label for="sectionName">Section Title:</label>
+        </div>
+        <div class="col-md-6">
+            <input type="text" id="sectionName" class="form-control" placeholder="Section Title"/>
+        </div>
+        <div class="col-md-4">
+            <button id="saveSection" class="btn btn-success">Save</button>
+            <button id="cancelSection" class="btn btn-danger">Cancel</button>
+        </div>
     </div>
     
-    <div class="button-group">
-        <button id="addSection" class="btn btn-default">Add Section</button>
-        <button id="addQuestion" class="btn btn-secondary">Add Question</button>
+    <div id="questionInput" class="row mb-3" style="display: none;">
+        <div class="col-md-2">
+            <label for="questionText">Question:</label>
+        </div>
+        <div class="col-md-6">
+            <input type="text" id="questionText" class="form-control" placeholder="Question Text"/>
+        </div>
+        <div class="col-md-4">
+            <button id="saveQuestion" class="btn btn-success">Save</button>
+            <button id="cancelQuestion" class="btn btn-danger">Cancel</button>    
+        </div>
     </div>
     
-    <div id="sectionInput" class="input-group" style="display: none;">
-        <input type="text" id="sectionName" class="form-control" placeholder="Section Title"/>
-        <button id="saveSection" class="btn btn-success">Save</button>
-        <button id="cancelSection" class="btn btn-default">Cancel</button>
-    </div>
-    
-    <div id="questionInput" class="input-group" style="display: none;">
-        <input type="text" id="questionText" class="form-control" placeholder="Question Text"/>
-        <button id="saveQuestion" class="btn btn-success">Save</button>
-        <button id="cancelQuestion" class="btn btn-default">Cancel</button>
-    </div>
-    
-    <div id="templateContent" class="sortable-list"></div>
+    <div id="templateContent"></div>
 </div>
 
 <div>
@@ -41,160 +68,211 @@
 </div>
 
 @section Scripts {
-    @{ await Html.RenderPartialAsync("Shared/_ValidationScriptsPartial"); }
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
-    <script>
-        let templateId = null;
-        
-        $(document).ready(function () {
-            $('#saveTemplate').click(function () {
-                let title = $('#templateTitle').val().trim();
-                if (title) {
-                    $.ajax({
-                        url: '?handler=CreateTemplate',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ name: title}),
-                        headers: {
-                            "RequestVerificationToken":
-                            $('input:hidden[name="__RequestVerificationToken"]').val()
-                        },
-                        success: function(result) {
-                            if(result.success){
-                                templateId = result.id;
-                                alert('Template saved successfully');
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error('Error saving template: ', xhr.responseText);
-                            alert('Failed to save template, please try again.');
-                        }
-                    });
-                }  else {
-                    alert('Please enter a title for the template');
-                }
-            });
-            
-            $('#addSection').click(function(){
-                let sectionName = $('#sectionName').val().trim();
-                if (sectionName && templateId) {
-                    $.ajax({
-                        url: '?handler=AddSection',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({name: sectionName, auditTemplateId: templateId}),
-                        headers: {
-                            "RequestVerificationToken":
-                            $('input:hidden[name="__RequestVerificationToken"]').val()
-                        },
-                        success: function (result) {
-                            if (result.success) {
-                                $('#templateContent').append(`<div class="sortable-item section" data-id="${result.id}">${sectionName}<span class="delete-btn">✖</span></div>`);
-                                $('#sectionInput').hide();
-                                $('#sectionName').val('');
-                            } else {
-                                alert(result.message || "Failed to add section");
-                            }
-                        }
-                    });
-                } else {
-                    alert('Please enter a section name');
-                }
-            });
-            
-            $('#saveQuestion').click(function () {
-                let questionText = $('#questionText').val().trim();
-                if (questionText && templateId) {
-                    $.ajax({
-                        url: '?handler=AddQuestion',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({text: questionText, sectionId: getLastSectionId()}),
-                        headers: {
-                            "RequestVerificationToken": 
-                            $('input:hidden[name="__RequestVerificationToken"]').val()
-                        },
-                        success: function (result) {
-                            if (result.success) {
-                                $('#templateContent').append(`<div class="sortable-item question" data-id="${result.id}">${questionText}<span class="delete-btn">✖</span></div>`);
-                                $('#questionInput').hide();
-                                $('#questionText').val('');
-                            } else {
-                                alert(result.message || "Failed to add question");
-                            }
-                        }
-                    });
-                } else {
-                    alert('Please enter a question');
-                }
-            });
-            
-            $('#cancelSection', '#cancelQuestion').click(function () {
-                $(this).closest('.input-group').hide();
-            });
-            
-            $(document).on('click', '.delete-btn', function () {
-                let item = $(this).parent();
-                let isSection = item.hasClass('section');
-                let url = isSection ? '?handler=DeleteSection' : '?handler=DeleteQuestion';
-                
+@section Scripts {
+<script>
+    let templateId = null;
+
+    $(document).ready(function() {
+        $('#addSection').click(function() {
+            $('#sectionInput').show();
+            $('#questionInput').hide();
+        });
+
+        $('#addQuestion').click(function() {
+            $('#questionInput').show();
+            $('#sectionInput').hide();
+        });
+
+        $('#saveTemplate').click(function() {
+            let title = $('#templateTitle').val().trim();
+            if (title) {
                 $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: JSON.stringify({id: item.data('id')}),
-                    contentType: 'application/json',
-                    headers: {
-                        "RequestVerificationToken":
-                            $('input:hidden[name="__RequestVerificationToken"]').val()
-                    },
-                    success: function (result) {
-                        if (result.success) {
-                            item.remove();
-                        } else {
-                            alert(result.message || "Failed to delete item");
-                        }
-                    }
-                });
-            });
-            
-            function getLastSectionId() {
-                return $('.sortable-item.section').last().data('id');
-            }
-            
-            new Sortable(document.getElementById('templateContent'), {
-            animation: 150,
-            ghostClass: 'blue-background-class',
-            onEnd: function (evt) {
-                let items = $('.sortable-item').map(function(index) {
-                    return {
-                        id: $(this).data('id'),
-                        type: $(this).hasClass('section') ? 'section' : 'question',
-                        order: index
-                    };
-                }).get();
-                
-                $.ajax({
-                    url: '?handler=UpdateOrder',
+                    url: '?handler=CreateTemplate',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify(items),
+                    data: JSON.stringify({ name: title }),
                     headers: {
                         "RequestVerificationToken":
                             $('input:hidden[name="__RequestVerificationToken"]').val()
                     },
                     success: function(result) {
                         if (result.success) {
-                            console.log('Order updated successfully');
-                        } else {
-                            console.error('Failed to update order: ', result.message);
+                            templateId = result.id;
+                            $('#templateTitleRow').hide();
+                            $('#displayedTemplateTitle').text(title);
+                            $('#templateTitleDisplay').show();
+                            alert('Template saved successfully');
                         }
                     },
-                    error: function(xhr, status, error){
-                        console.error("Error updating order: ", error);
+                    error: function(xhr, status, error) {
+                        console.error('Error saving template:', xhr.responseText);
+                        alert('Failed to save template. Please try again.');
                     }
                 });
-            }});
+            } else {
+                alert('Please enter a template title');
+            }
         });
-    </script>
-}
 
+        $('#editTemplateTitle').click(function(e) {
+            e.preventDefault();
+            $('#templateTitleDisplay').hide();
+            $('#templateTitleRow').show();
+        });
+
+        $('#saveSection').click(function() {
+            let sectionName = $('#sectionName').val().trim();
+            if (sectionName && templateId) {
+                $.ajax({
+                    url: '?handler=AddSection',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ name: sectionName, auditTemplateId: templateId }),
+                    headers: {
+                        "RequestVerificationToken":
+                            $('input:hidden[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                        if (result.success) {
+                            $('#templateContent').append(`
+                                    <div class="row mb-2 section-item" data-id="${result.id}">
+                                        <div class="col-md-8">
+                                            <h4>${sectionName}</h4>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <a href="#" class="edit-section">Edit</a>
+                                            <a href="#" class="delete-section">❌</a>
+                                        </div>
+                                    </div>
+                                `);
+                            $('#sectionInput').hide();
+                            $('#sectionName').val('');
+                        } else {
+                            alert(result.message || 'Failed to add section');
+                        }
+                    }
+                });
+            } else {
+                alert('Please enter a section name');
+            }
+        });
+
+        $('#saveQuestion').click(function() {
+            let questionText = $('#questionText').val().trim();
+            if (questionText && templateId) {
+                $.ajax({
+                    url: '?handler=AddQuestion',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ text: questionText, sectionId: getLastSectionId() }),
+                    headers: {
+                        "RequestVerificationToken":
+                            $('input:hidden[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                        if (result.success) {
+                            $('#templateContent').append(`
+                                    <div class="row mb-2 question-item" data-id="${result.id}">
+                                        <div class="col-md-8">
+                                            ${questionText}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <a href="#" class="edit-question">Edit</a>
+                                            <a href="#" class="delete-question">❌</a>
+                                        </div>
+                                    </div>
+                                `);
+                            $('#questionInput').hide();
+                            $('#questionText').val('');
+                        } else {
+                            alert(result.message || 'Failed to add question');
+                        }
+                    }
+                });
+            } else {
+                alert('Please enter a question');
+            }
+        });
+
+        $('#cancelSection, #cancelQuestion').click(function() {
+            $(this).closest('.row').hide();
+        });
+
+        $(document).on('click', '.delete-section, .delete-question', function(e) {
+            e.preventDefault();
+            let item = $(this).closest('.row');
+            let isSection = item.hasClass('section-item');
+            let url = isSection ? '?handler=DeleteSection' : '?handler=DeleteQuestion';
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: JSON.stringify({ id: item.data('id') }),
+                contentType: 'application/json',
+                headers: {
+                    "RequestVerificationToken":
+                        $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function(result) {
+                    if (result.success) {
+                        item.remove();
+                    } else {
+                        alert(result.message || 'Failed to delete item');
+                    }
+                }
+            });
+        });
+
+        $(document).on('click', '.edit-section, .edit-question', function(e) {
+            e.preventDefault();
+            let item = $(this).closest('.row');
+            let text = item.find('h4, .col-md-8:not(:has(h4))').text().trim();
+            let isSection = item.hasClass('section-item');
+
+            if (isSection) {
+                $('#sectionName').val(text);
+                $('#sectionInput').show();
+            } else {
+                $('#questionText').val(text);
+                $('#questionInput').show();
+            }
+
+            item.hide();
+
+            let saveButton = isSection ? $('#saveSection') : $('#saveQuestion');
+            saveButton.off('click').on('click', function() {
+                let newText = isSection ? $('#sectionName').val().trim() : $('#questionText').val().trim();
+                if (newText) {
+                    $.ajax({
+                        url: isSection ? '?handler=UpdateSection' : '?handler=UpdateQuestion',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ id: item.data('id'), text: newText }),
+                        headers: {
+                            "RequestVerificationToken":
+                                $('input:hidden[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(result) {
+                            if (result.success) {
+                                if (isSection) {
+                                    item.find('h4').text(newText);
+                                } else {
+                                    item.find('.col-md-8').text(newText);
+                                }
+                                item.show();
+                                $('#sectionInput, #questionInput').hide();
+                            } else {
+                                alert(result.message || 'Failed to update item');
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        function getLastSectionId() {
+            return $('.section-item').last().data('id');
+        }
+    });
+</script>
+}

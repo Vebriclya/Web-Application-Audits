@@ -62,10 +62,6 @@
     let templateId = null;
 
     $(document).ready(function() {
-        $('#addSection').click(function() {
-            $('#sectionInput').show();
-        });
-
         $('#saveTemplate').click(function() {
             let title = $('#templateTitle').val().trim();
             if (title) {
@@ -101,6 +97,10 @@
             e.preventDefault();
             $('#templateTitleDisplay').hide();
             $('#templateTitleRow').show();
+        });
+
+        $('#addSection').click(function() {
+            $('#sectionInput').show();
         });
 
         $('#saveSection').click(function() {
@@ -148,67 +148,6 @@
             } else {
                 alert('Please enter a section name');
             }
-        });
-
-        $(document).on('click', '.add-question', function() {
-            let sectionItem = $(this).closest('.section-item');
-            let questionInput = `
-                    <div class="question-input row mt-2">
-                        <div class="col-md-6">
-                            <input type="text" class="form-control question-text" placeholder="Enter question" />
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-success save-question">Save</button>
-                            <button class="btn btn-danger cancel-question">Cancel</button>
-                        </div>
-                    </div>
-                `;
-            sectionItem.find('.questions-container').prepend(questionInput);
-        });
-
-        $(document).on('click', '.save-question', function() {
-            let questionInput = $(this).closest('.question-input');
-            let sectionItem = questionInput.closest('.section-item');
-            let questionText = questionInput.find('.question-text').val().trim();
-            if (questionText) {
-                $.ajax({
-                    url: '?handler=AddQuestion',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ text: questionText, sectionId: sectionItem.data('id') }),
-                    headers: {
-                        "RequestVerificationToken":
-                            $('input:hidden[name="__RequestVerificationToken"]').val()
-                    },
-                    success: function(result) {
-                        if (result.success) {
-                            questionInput.replaceWith(`
-                                    <div class="row mb-2 question-item" data-id="${result.id}">
-                                        <div class="col-md-8">
-                                            ${questionText}
-                                        </div>
-                                        <div class="col-md-4 text-right">
-                                            <a href="#" class="edit-question">Edit</a>
-                                            <a href="#" class="delete-question">❌</a>
-                                        </div>
-                                    </div>
-                                `);
-                        } else {
-                            alert(result.message || 'Failed to add question');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error adding question:', xhr.responseText);
-                        alert('Failed to add question. Please try again.');
-                    }
-                });
-            } else {
-                alert('Please enter a question');
-            }
-        });
-
-        $(document).on('click', '.cancel-question', function() {
-            $(this).closest('.question-input').remove();
         });
 
         $('#cancelSection').click(function() {
@@ -286,6 +225,67 @@
                     }
                 }
             });
+        });
+
+        $(document).on('click', '.add-question', function() {
+            let sectionItem = $(this).closest('.section-item');
+            let questionInput = `
+                    <div class="question-input row mt-2">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control question-text" placeholder="Enter question" />
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-success save-question">Save</button>
+                            <button class="btn btn-danger cancel-question">Cancel</button>
+                        </div>
+                    </div>
+                `;
+            sectionItem.find('.questions-container').prepend(questionInput);
+        });
+
+        $(document).on('click', '.save-question', function() {
+            let questionInput = $(this).closest('.question-input');
+            let sectionItem = questionInput.closest('.section-item');
+            let questionText = questionInput.find('.question-text').val().trim();
+            if (questionText) {
+                $.ajax({
+                    url: '?handler=AddQuestion',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ text: questionText, sectionId: sectionItem.data('id') }),
+                    headers: {
+                        "RequestVerificationToken":
+                            $('input:hidden[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                        if (result.success) {
+                            questionInput.replaceWith(`
+                                    <div class="row mb-2 question-item" data-id="${result.id}">
+                                        <div class="col-md-8">
+                                            ${questionText}
+                                        </div>
+                                        <div class="col-md-4 text-right">
+                                            <a href="#" class="edit-question">Edit</a>
+                                            <a href="#" class="delete-question">❌</a>
+                                        </div>
+                                    </div>
+                                `);
+                        } else {
+                            alert(result.message || 'Failed to add question');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error adding question:', xhr.responseText);
+                        alert('Failed to add question. Please try again.');
+                    }
+                });
+            } else {
+                alert('Please enter a question');
+            }
+        });
+
+        $(document).on('click', '.cancel-question', function() {
+            $(this).closest('.question-input').remove();
         });
     });
 </script>

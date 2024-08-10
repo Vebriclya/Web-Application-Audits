@@ -6,34 +6,34 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
 
-<h4>Audit Template</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post" id="createForm">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="AuditTemplate.Name" class="control-label"></label>
-                <input asp-for="AuditTemplate.Name" class="form-control" />
-                <span asp-validation-for="AuditTemplate.Name" class="text-danger"></span>
-            </div>
-            <div id="sections">
-                <!-- Section fields are dynamically added here -->
-            </div>
-            <button type="button" onclick="addSection()">Add Section</button>
-            
-            <div id="questions">
-                <!-- Question fields are dynamically added here -->
-            </div>
-            <button type="button" onclick="addQuestion()">Add Question</button>
-            
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<h2>Create New Audit Template</h2>
+
+<div class="form-container">
+    <div class="form-group">
+        <label for="templateTitle">Template Title:</label>
+        <input type="text" class="form-control" id="templateTitle" placeholder="Enter template title">
+        <button id="saveTemplate" class="btn btn-default">Save</button>
     </div>
+    
+    <div class="button-group">
+        <button id="addSection" class="btn btn-default">Add Section</button>
+        <button id="addQuestion" class="btn btn-secondary">Add Question</button>
+    </div>
+    
+    <div id="sectionInput" class="input-group" style="display: none;">
+        <input type="text" id="sectionName" class="form-control" placeholder="Section Title"/>
+        <button id="saveSection" class="btn btn-success">Save</button>
+        <button id="cancelSection" class="btn btn-default">Cancel</button>
+    </div>
+    
+    <div id="questionInput" class="input-group" style="display: none;">
+        <input type="text" id="questionText" class="form-control" placeholder="Question Text"/>
+        <button id="saveQuestion" class="btn btn-success">Save</button>
+        <button id="cancelQuestion" class="btn btn-default">Cancel</button>
+    </div>
+    
+    <div id="templateContent" class="sortable-list"></div>
 </div>
 
 <div>
@@ -42,9 +42,122 @@
 
 @section Scripts {
     @{ await Html.RenderPartialAsync("Shared/_ValidationScriptsPartial"); }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script>
+        let templateId = null;
         
-        new Sortable(document.getElementById('templateContent'), {
+        $(document).ready(function () {
+            $('#saveTemplate').click(function () {
+                let title = $('#templateTitle').val().trim();
+                if (title) {
+                    $.ajax({
+                        url: '?handler=CreateTemplate',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ name: title}),
+                        headers: {
+                            "RequestVerificationToken":
+                            $('input:hidden[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(result) {
+                            if(result.success){
+                                templateId = result.id;
+                                alert('Template saved successfully');
+                            }
+                        }
+                    });
+                }  else {
+                    alert('Please enter a title for the template');
+                }
+            });
+            
+            $('#addSection').click(function(){
+                let sectionName = $('#sectionName').val().trim();
+                if (sectionName && templateId) {
+                    $.ajax({
+                        url: '?handler=AddSection',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({name: sectionName, auditTemplateId: templateId}),
+                        headers: {
+                            "RequestVerificationToken":
+                            $('input:hidden[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (result) {
+                            if (result.success) {
+                                $('#templateContent').append(`<div class="sortable-item section" data-id="${result.id}">${sectionName}<span class="delete-btn">✖</span></div>`);
+                                $('#sectionInput').hide();
+                                $('#sectionName').val('');
+                            } else {
+                                alert(result.message || "Failed to add section");
+                            }
+                        }
+                    });
+                } else {
+                    alert('Please enter a section name');
+                }
+            });
+            
+            $('#saveQuestion').click(function () {
+                let questionText = $('#questionText').val().trim();
+                if (questionText && templateId) {
+                    $.ajax({
+                        url: '?handler=AddQuestion',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({text: questionText, sectionId: getLastSectionId()}),
+                        headers: {
+                            "RequestVerificationToken": 
+                            $('input:hidden[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (result) {
+                            if (result.success) {
+                                $('#templateContent').append(`<div class="sortable-item question" data-id="${result.id}">${questionText}<span class="delete-btn">✖</span></div>`);
+                                $('#questionInput').hide();
+                                $('#questionText').val('');
+                            } else {
+                                alert(result.message || "Failed to add question");
+                            }
+                        }
+                    });
+                } else {
+                    alert('Please enter a question');
+                }
+            });
+            
+            $('#cancelSection', '#cancelQuestion').click(function () {
+                $(this).closest('.input-group').hide();
+            });
+            
+            $(document).on('click', '.delete-btn', function () {
+                let item = $(this).parent();
+                let isSection = item.hasClass('section');
+                let url = isSection ? '?handler=DeleteSection' : '?handler=DeleteQuestion';
+                
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: JSON.stringify({id: item.data('id')}),
+                    contentType: 'application/json',
+                    headers: {
+                        "RequestVerificationToken":
+                            $('input:hidden[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            item.remove();
+                        } else {
+                            alert(result.message || "Failed to delete item");
+                        }
+                    }
+                });
+            });
+            
+            function getLastSectionId() {
+                return $('.sortable-item.section').last().data('id');
+            }
+            
+            new Sortable(document.getElementById('templateContent'), {
             animation: 150,
             ghostClass: 'blue-background-class',
             onEnd: function (evt) {
@@ -76,36 +189,8 @@
                         console.error("Error updating order: ", error);
                     }
                 });
-            }
+            }});
         });
-   
-        function addSection() {
-            var sectionIndex = $('.section').length;
-            var sectionHtml = `
-            <div class="section">
-                <input name="Sections[${sectionIndex}].Name" class="form-control" placeholder="Section Name" />
-                <button type="button" onclick="remove(this)">Remove Section</button>
-            </div>`;
-            $('#sections').append(sectionHtml);
-        }
-        
-        function addQuestion() {
-            var questionIndex = $('.question').length;
-            var questionHtml = `
-            <div class="question">
-                <input name="Questions[${questionIndex}].Text" class="form-control" placeholder="Question Text" />
-                <select name="Questions[${questionIndex}].SectionId" class="form-control">
-                    ${$('.section').map((i, section) => `<option value="${i}">${$(section).find('input').val()}</option>`).get().join('')}
-                </select>
-                <button type="button" onclick="remove(this)">Remove Question</button>
-            </div>`;
-            $('#questions').append(questionHtml);
-        }
-        
-        function remove(button) {
-            $(button).closest('.section, .question').remove();
-        }
-    
     </script>
-    }
+}
 

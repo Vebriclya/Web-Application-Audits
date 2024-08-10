@@ -148,6 +148,36 @@ namespace AuditApplication.Pages.AuditTemplates
 
             return NotFound();
         }
+        
+        public async Task<IActionResult> OnPostUpdateSectionAsync([FromBody] UpdateItemRequest request)
+        {
+            var section = await _context.Sections.FindAsync(request.Id);
+            if (section == null)
+            {
+                return NotFound();
+            }
+            section.Name = request.Text;
+            await _context.SaveChangesAsync();
+            return new JsonResult(new { success = true });
+        }
+        
+        public async Task<IActionResult> OnPostUpdateQuestionAsync([FromBody] UpdateItemRequest request)
+        {
+            var question = await _context.Questions.FindAsync(request.Id);
+            if (question == null)
+            {
+                return NotFound();
+            }
+            question.Text = request.Text;
+            await _context.SaveChangesAsync();
+            return new JsonResult(new { success = true });
+        }
+        
+        public class UpdateItemRequest
+        {
+            public int Id { get; set; }
+            public string Text { get; set; }
+        }
 
         public class OrderItem
         {

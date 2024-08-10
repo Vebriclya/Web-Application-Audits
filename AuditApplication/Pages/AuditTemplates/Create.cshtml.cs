@@ -25,7 +25,12 @@ namespace AuditApplication.Pages.AuditTemplates
         }
 
         [BindProperty]
-        public AuditTemplate AuditTemplate { get; set; } = default!;
+        public AuditTemplate AuditTemplate { get; set; }
+        [BindProperty]
+        public List<Section> Sections { get; set; } = new List<Section>();
+        [BindProperty]
+        public List<Question> Questions { get; set; } = new List<Question>();
+        
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
@@ -38,6 +43,19 @@ namespace AuditApplication.Pages.AuditTemplates
             _context.AuditTemplates.Add(AuditTemplate);
             await _context.SaveChangesAsync();
 
+            foreach (var section in Sections)
+            {
+                section.AuditTemplateId = AuditTemplate.Id;
+                _context.Sections.Add(section);
+            }
+            await _context.SaveChangesAsync();
+
+            foreach (var question in Questions)
+            {
+                _context.Questions.Add(question);
+            }
+            await _context.SaveChangesAsync();
+            
             return RedirectToPage("./Index");
         }
     }

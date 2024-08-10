@@ -26,6 +26,26 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = C:\Users\alex.sherman.STEPPINGSTONES\Desktop\Audit Application\AuditWebApplication\AuditApplication
 build_property._RazorSourceGeneratorDebug = 
 
+[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Audits/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRzXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Audits/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRzXERlbGV0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Audits/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRzXERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Audits/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRzXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Audits/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/AuditTemplates/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRUZW1wbGF0ZXNcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

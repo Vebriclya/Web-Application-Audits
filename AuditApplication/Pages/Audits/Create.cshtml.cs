@@ -22,12 +22,6 @@ namespace AuditApplication.Pages.Audits
             _context = context;
         }
 
-        public IActionResult OnGet()
-        {
-        ViewData["TemplateId"] = new SelectList(_context.AuditTemplates, "Id", "Id");
-            return Page();
-        }
-
         public async Task OnGetAsync()
         {
             AvailableTemplates = await _context.AuditTemplates.ToListAsync();

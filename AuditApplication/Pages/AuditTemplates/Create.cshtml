@@ -12,7 +12,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form method="post">
+        <form method="post" id="createForm">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="AuditTemplate.Name" class="control-label"></label>
@@ -45,19 +45,21 @@
     <script>
    
         function addSection() {
+            var sectionIndex = $('.section').length;
             var sectionHtml = `
             <div class="section">
-                <input name="Sections[${$('.section').length}].Name" class="form-control" placeholder="Section Name" />
+                <input name="Sections[${sectionIndex}].Name" class="form-control" placeholder="Section Name" />
                 <button type="button" onclick="remove(this)">Remove Section</button>
             </div>`;
             $('#sections').append(sectionHtml);
         }
         
         function addQuestion() {
+            var questionIndex = $('.question').length;
             var questionHtml = `
             <div class="question">
-                <input name="Questions[${$('.question').length}].Text" class="form-control" placeholder="Question Text" />
-                <select name="Questions[${$('.question').length}].SectionId" class="form-control">
+                <input name="Questions[${questionIndex}].Text" class="form-control" placeholder="Question Text" />
+                <select name="Questions[${questionIndex}].SectionId" class="form-control">
                     ${$('.section').map((i, section) => `<option value="${i}">${$(section).find('input').val()}</option>`).get().join('')}
                 </select>
                 <button type="button" onclick="remove(this)">Remove Question</button>
@@ -66,7 +68,7 @@
         }
         
         function remove(button) {
-            $(button).closest('.section').remove();
+            $(button).closest('.section, .question').remove();
         }
     </script>
 }

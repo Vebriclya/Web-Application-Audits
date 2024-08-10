@@ -102,191 +102,184 @@
         $('#addSection').click(function() {
             $('#sectionInput').show();
         });
-
-        $('#saveSection').click(function() {
-            let sectionName = $('#sectionName').val().trim();
-            if (sectionName && templateId) {
+        
+        function addItem(type, name, containerId){
+            if (name && (type === 'section' ? templateId : true)) {
+                let url = type === 'section' ? '?handler=AddSection' : '?handler=AddQuestion';
+                let data = type === 'section' 
+                    ? { name: name, auditTemplateId: templateId }
+                    : { text: name, sectionId: containerId };
+                    
                 $.ajax({
-                    url: '?handler=AddSection',
+                    url: url,
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({ name: sectionName, auditTemplateId: templateId }),
+                    data: JSON.stringify(data),
                     headers: {
                         "RequestVerificationToken":
                             $('input:hidden[name="__RequestVerificationToken"]').val()
                     },
-                    success: function(result) {
+                    success: function (result) {
                         if (result.success) {
-                            $('#templateContent').append(`
-                                    <div class="card mb-3 section-item" data-id="${result.id}">
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-8">
-                                                    <h4>${sectionName}</h4>
-                                                </div>
-                                                <div class="col-md-4 text-right">
-                                                    <a href="#" class="edit-section">Edit</a>
-                                                    <a href="#" class="delete-section">❌</a>
-                                                </div>
-                                            </div>
-                                            <button class="btn btn-secondary add-question mt-2">Add Question</button>
-                                            <div class="questions-container"></div>
-                                        </div>
-                                    </div>
-                                `);
-                            $('#sectionInput').hide();
-                            $('#sectionName').val('');
+                            let newItemHtml = createItemHtml(type,  result.id, name);
+                            if (type === 'section') {
+                                $('#templateContent').append(newItemHtml);
+                            } else {
+                                $(`section-${containerId} .questions-container`).append(newItemHtml);
+                            }
+                            $(`#${type}Input`).hide();
+                            $(`#${type}Name`).val('');
                         } else {
-                            alert(result.message || 'Failed to add section');
+                            alert(result.message || `Failed to add ${type}`);
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error adding section:', xhr.responseText);
-                        alert('Failed to add section. Please try again.');
+                    }, 
+                    error: function (xhr, status, error) {
+                        console.error(`Error adding ${type}`, xhr.responseText);
+                        alert(`Failed to add ${type}. Please try again.`);
                     }
                 });
             } else {
-                alert('Please enter a section name');
+                alert(`Please enter ${type} text`);
             }
-        });
+        }
+        
+        function createItemHtml(type, id, name) {
+            return `
+                <div class="card mb-3 ${type}-item" data-id="${id}" id="${type}-${id}">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <${type === 'section' ? 'h4' : 'p'}>${name}</${type === 'section' ? 'h4' : 'p'}>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="#" class="edit-item" data-type="${type}">Edit</a>
+                                <a href="#" class="delete-item" data-type="${type}">❌</a>
+                            </div>
+                        </div>
+                    ${type === 'section' ? `
+                        <button class="btn btn-secondary add-question mt-2">Add Question</button>
+                        <div class="questions-container"></div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        }
 
-        $('#cancelSection').click(function() {
-            $('#sectionInput').hide();
-            $('#sectionName').val('');
-        });
-
-        $(document).on('click', '.edit-section, .edit-question', function(e) {
-            e.preventDefault();
-            let item = $(this).closest('.row');
-            let text = item.find('h4, .col-md-8:not(:has(h4))').text().trim();
-            let isSection = item.hasClass('section-item');
-
-            if (isSection) {
-                $('#sectionName').val(text);
-                $('#sectionInput').show();
-            } else {
-                $('#questionText').val(text);
-                $('#questionInput').show();
-            }
-
-            item.hide();
-
-            let saveButton = isSection ? $('#saveSection') : $('#saveQuestion');
-            saveButton.off('click').on('click', function() {
-                let newText = isSection ? $('#sectionName').val().trim() : $('#questionText').val().trim();
-                if (newText) {
-                    $.ajax({
-                        url: isSection ? '?handler=UpdateSection' : '?handler=UpdateQuestion',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ id: item.data('id'), text: newText }),
-                        headers: {
-                            "RequestVerificationToken":
-                                $('input:hidden[name="__RequestVerificationToken"]').val()
-                        },
-                        success: function(result) {
-                            if (result.success) {
-                                if (isSection) {
-                                    item.find('h4').text(newText);
-                                } else {
-                                    item.find('.col-md-8').text(newText);
-                                }
-                                item.show();
-                                $('#sectionInput, #questionInput').hide();
-                            } else {
-                                alert(result.message || 'Failed to update item');
-                            }
-                        }
-                    });
-                }
-            });
-        });
-
-        $(document).on('click', '.delete-section, .delete-question', function(e) {
-            e.preventDefault();
-            let item = $(this).closest('.row');
-            let isSection = item.hasClass('section-item');
-            let url = isSection ? '?handler=DeleteSection' : '?handler=DeleteQuestion';
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: JSON.stringify({ id: item.data('id') }),
-                contentType: 'application/json',
-                headers: {
-                    "RequestVerificationToken":
-                        $('input:hidden[name="__RequestVerificationToken"]').val()
-                },
-                success: function(result) {
-                    if (result.success) {
-                        item.remove();
-                    } else {
-                        alert(result.message || 'Failed to delete item');
-                    }
-                }
-            });
+        $('#saveSection').click(function() {
+            addItem('section', $('#sectionName').val().trim());
         });
 
         $(document).on('click', '.add-question', function() {
-            let sectionItem = $(this).closest('.section-item');
+            let sectionId = $(this).closest('.section-item').data('id');
             let questionInput = `
                     <div class="question-input row mt-2">
                         <div class="col-md-6">
                             <input type="text" class="form-control question-text" placeholder="Enter question" />
                         </div>
                         <div class="col-md-4">
-                            <button class="btn btn-success save-question">Save</button>
+                            <button class="btn btn-success save-question" data-section-id="${sectionId}">Save</button>
                             <button class="btn btn-danger cancel-question">Cancel</button>
                         </div>
                     </div>
                 `;
-            sectionItem.find('.questions-container').prepend(questionInput);
+            $(this).siblings('.questions-container').prepent(questionInput);
         });
 
         $(document).on('click', '.save-question', function() {
-            let questionInput = $(this).closest('.question-input');
-            let sectionItem = questionInput.closest('.section-item');
-            let questionText = questionInput.find('.question-text').val().trim();
-            if (questionText) {
+            let sectionId = $(this).data('section-id');
+            let questionText = $(this).closest('.question-input').find('.question-text').val().trim();
+            addItem('question', questionText, sectionId);
+        });
+           
+        $(document).on('click', '.edit-item', function () {
+            e.preventDefault();
+            let item = $(this).closest('.card');
+            let type = $(this).data('type');
+            let text = item.find(type === 'section' ? 'h4' : 'p').text().trim();
+            
+            item.hide();
+            item.after(`
+                <div class="edit-${type}-form mb-3">
+                    <input type="text" class="form-control ${type}-name-edit" value="${text}">
+                    <button class="btn btn-success save-${type}-edit mt-2" data-id="${item.data('id')}">Save</button>
+                    <button class="btn btn-danger cancel-${type}-edit mt-2">Cancel</button>
+                </div>
+            `);
+        });
+        
+        $(document).on('click', '.save-section-edit', '.save-question-edit', function(){
+            let type = $(this).hasClass('save-section-edit') ? 'section' : 'question';
+            let newName = $(`.${type}-name-edit`).val().trim();
+            let id = $(this).data('id');
+            
+            if (newName) {
                 $.ajax({
-                    url: '?handler=AddQuestion',
+                    url: `?handler=Update${type.charAt(0).toUpperCase() + type.slice(1)}`,
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({ text: questionText, sectionId: sectionItem.data('id') }),
+                    data: JSON.stringify({ id: id, name: newName}),
                     headers: {
                         "RequestVerificationToken":
                             $('input:hidden[name="__RequestVerificationToken"]').val()
                     },
-                    success: function(result) {
+                    success: function (result) {
                         if (result.success) {
-                            questionInput.replaceWith(`
-                                    <div class="row mb-2 question-item" data-id="${result.id}">
-                                        <div class="col-md-8">
-                                            ${questionText}
-                                        </div>
-                                        <div class="col-md-4 text-right">
-                                            <a href="#" class="edit-question">Edit</a>
-                                            <a href="#" class="delete-question">❌</a>
-                                        </div>
-                                    </div>
-                                `);
+                            $(`#${type}=${id}`).find(type === 'section' ? 'h4' : 'p').text(newName);
+                            $(`#${type}=${id}`).show();
+                            $(`.edit-${type}-form`).remove();
                         } else {
-                            alert(result.message || 'Failed to add question');
+                            alert(result.message || `Failed to update ${type}`);
                         }
                     },
-                    error: function(xhr, status, error) {
-                        console.error('Error adding question:', xhr.responseText);
-                        alert('Failed to add question. Please try again.');
+                    error: function (xhr, status, error) {
+                        console.error(`Error updating ${type}: `, xhr.responseText);
+                        alert(`Failed to update ${type}. Please try again.`);
                     }
                 });
             } else {
-                alert('Please enter a question');
+                alert(`Please enter a ${type} name.`);
             }
         });
-
-        $(document).on('click', '.cancel-question', function() {
+        
+        $(document).on('click', '.cancel-section-edit', '.cancel-question-edit', function(){
+            let type = $(this).hasClass('cancel-section-edit') ? 'section' : 'question';
+            $(`.edit-${type}-form`).prev().show();
+            $(`.edit-${type}-form`).remove();
+        });
+        
+        $(document).on('click', '.delete-item', function (e) {
+            e.preventDefault();
+            let item = $(this).closest('.card');
+            let type = $(this).data('type');
+            
+            $.ajax({
+                url: `?handler=Delete${type.charAt(0).toUpperCase() + type.slice(1)}`,
+                type: 'POST',
+                data: JSON.stringify({id: item.data('id')}),
+                contentType: 'application/json',
+                headers: {
+                    "RequestVerificationToken":
+                        $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function (result) {
+                    if (result.success) {
+                        item.remove();
+                    } else {
+                        alert(result.message || `Failed to delete ${type}`);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(`Error deleting ${type}: `, xhr.responseText);
+                    alert(`Failed to delete ${type}. Please try again.`);
+                }
+            });
+        });
+        
+        $(document).on('click', '.cancel-question', function () {
             $(this).closest('.question-input').remove();
         });
+        
     });
-</script>
+    </script>
 }
+ 

@@ -38,6 +38,10 @@ namespace AuditApplication.Pages.AuditTemplates
 
         public async Task<IActionResult> OnPostAddSectionAsync([FromBody] Section section)
         {
+            if (string.IsNullOrWhiteSpace(section.Name))
+            {
+                return new JsonResult(new { success = false, message = "Section name cannot be empty." });
+            }
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -50,6 +54,11 @@ namespace AuditApplication.Pages.AuditTemplates
 
         public async Task<IActionResult> OnPostAddQuestionAsync([FromBody] Question question)
         {
+            if (string.IsNullOrWhiteSpace(question.Text))
+            {
+                return new JsonResult(new { success = false, message = "Question text cannot be empty." });
+            }
+            
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

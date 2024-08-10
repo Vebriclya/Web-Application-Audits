@@ -7,12 +7,15 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using AuditApplication.Data;
 using AuditApplication.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuditApplication.Pages.Audits
 {
     public class CreateModel : PageModel
     {
         private readonly AuditApplication.Data.AuditContext _context;
+        
+        public List<AuditTemplate> AvailableTemplates { get;set; }
 
         public CreateModel(AuditApplication.Data.AuditContext context)
         {
@@ -25,6 +28,11 @@ namespace AuditApplication.Pages.Audits
             return Page();
         }
 
+        public async Task OnGetAsync()
+        {
+            AvailableTemplates = await _context.AuditTemplates.ToListAsync();
+        }
+        
         [BindProperty]
         public Audit Audit { get; set; } = default!;
 

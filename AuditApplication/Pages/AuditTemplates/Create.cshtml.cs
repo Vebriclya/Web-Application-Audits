@@ -21,9 +21,8 @@ namespace AuditApplication.Pages.AuditTemplates
             _context = context;
             _logger = logger;
         }
-        
-        [BindProperty]
-        public AuditTemplate AuditTemplate { get; set; }
+
+        [BindProperty] public AuditTemplate AuditTemplate { get; set; }
 
         public async Task<IActionResult> OnPostCreateTemplateAsync([FromBody] AuditTemplate template)
         {
@@ -31,7 +30,7 @@ namespace AuditApplication.Pages.AuditTemplates
             {
                 return BadRequest(ModelState);
             }
-            
+
             _context.AuditTemplates.Add(template);
             await _context.SaveChangesAsync();
             return new JsonResult(new { success = true, id = template.Id });
@@ -43,7 +42,7 @@ namespace AuditApplication.Pages.AuditTemplates
             {
                 return BadRequest(ModelState);
             }
-            
+
             _context.Sections.Add(section);
             await _context.SaveChangesAsync();
             return new JsonResult(new { success = true, id = section.Id });
@@ -55,77 +54,89 @@ namespace AuditApplication.Pages.AuditTemplates
             {
                 return BadRequest(ModelState);
             }
-            
+
             _context.Questions.Add(question);
             await _context.SaveChangesAsync();
             return new JsonResult(new { success = true, id = question.Id });
         }
 
-        // public async Task<IActionResult> OnPostUpdateOrderAsync([FromBody] List<OrderItem> items)
-        // {
-        //     
-        // }
-        public IActionResult OnGet()
+        public async Task<IActionResult> OnPostUpdateOrderAsync([FromBody] List<OrderItem> items)
         {
-            AuditTemplate = new AuditTemplate();
-            return Page();
-        }
-        
-        [BindProperty]
-        public List<Section> Sections { get; set; } = new List<Section>();
-        [BindProperty]
-        public List<Question> Questions { get; set; } = new List<Question>();
-        
-
-        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
-        public async Task<IActionResult> OnPostAsync()
-        {
-            _logger.LogInformation($"Attempting to create template with {Sections?.Count ?? 0} sections and {Questions?.Count ?? 0} questions");
-            if (Sections == null || !Sections.Any())
-            {
-                ModelState.AddModelError("", "At least one section is required");
-                return Page();
-            }
-            
             if (!ModelState.IsValid)
             {
-                foreach (var modelState in ModelState.Values)
-                {
-                    foreach (var error in modelState.Errors)
-                    {
-                        _logger.LogError($"Validation error: {error.ErrorMessage}");
-                    }
-                }
-
-                return Page();
+                return BadRequest(ModelState);
             }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                _context.AuditTemplates.Add(AuditTemplate);
-                await _context.SaveChangesAsync();
-
-                foreach (var section in Sections)
+                foreach (var item in items)
                 {
-                    section.AuditTemplateId = AuditTemplate.Id;
-                    _context.Sections.Add(section);
+                    if (item.Type == "section")
+                    {
+                        var section = await _context.Sections.FindAsync(item.Id);
+                        if (section != null)
+                        {
+                            section.Order = item.Order;
+                            _context.Sections.Update(section);
+                        }
+                    }
+                    else if (item.Type == "question")
+                    {
+                        var question = await _context.Questions.FindAsync(item.Id);
+                        if (question != null)
+                        {
+                            question.Order = item.Order;
+                            _context.Questions.Update(question);
+                        }
+                    }
                 }
-                await _context.SaveChangesAsync();
 
-                foreach (var question in Questions)
-                {
-                    _context.Questions.Add(question);
-                }
                 await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-                return RedirectToPage("./Index");
+                return new JsonResult(new { success = true });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error saving audit template: {ex.Message}");
-                ModelState.AddModelError(string.Empty, "An error occurred while saving the audit template, please try again.");
-                return Page();
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error updating order");
+                return new JsonResult(new { success = false, message = "An error occurred while updating the order." });
             }
+        }
+
+        public async Task<IActionResult> OnDeleteSectionAsync(int id)
+        {
+            var section = await _context.Sections.FindAsync(id);
+            if (section != null)
+            {
+                _context.Sections.Remove(section);
+                await _context.SaveChangesAsync();
+                return new JsonResult(new { success = true });
+            }
+
+            return NotFound();
+        }
+
+        public async Task<IActionResult> OnDeleteQuestionAsync(int id)
+        {
+            var question = await _context.Questions.FindAsync(id);
+            if (question != null)
+            {
+                _context.Questions.Remove(question);
+                await _context.SaveChangesAsync();
+                return new JsonResult(new { success = true });
+            }
+
+            return NotFound();
+        }
+
+        public class OrderItem
+        {
+            public int Id { get; set; }
+            public string Type { get; set; }
+            public int Order { get; set; }
         }
     }
 }

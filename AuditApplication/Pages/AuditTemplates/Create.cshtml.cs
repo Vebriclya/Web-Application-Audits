@@ -9,8 +9,10 @@ using AuditApplication.Data;
 using AuditApplication.Models;
 using Microsoft.Extensions.Logging;
 
+
 namespace AuditApplication.Pages.AuditTemplates
 {
+    [IgnoreAntiforgeryToken]
     public class CreateModel : PageModel
     {
         private readonly AuditContext _context;
@@ -24,16 +26,22 @@ namespace AuditApplication.Pages.AuditTemplates
 
         [BindProperty] public AuditTemplate AuditTemplate { get; set; }
 
-        public async Task<IActionResult> OnPostCreateTemplateAsync([FromBody] AuditTemplate template)
+        public async Task<IActionResult> OnPostCreateTemplateAsync([FromBody] CreateTemplateRequest request)
         {
-            if (!ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(request.Name))
             {
-                return BadRequest(ModelState);
+                return BadRequest("Template name is required.");
             }
-
+            
+            var template = new AuditTemplate { Name = request.Name };
             _context.AuditTemplates.Add(template);
             await _context.SaveChangesAsync();
             return new JsonResult(new { success = true, id = template.Id });
+        }
+
+        public class CreateTemplateRequest
+        {
+            public string Name { get; set; }
         }
 
         public async Task<IActionResult> OnPostAddSectionAsync([FromBody] Section section)

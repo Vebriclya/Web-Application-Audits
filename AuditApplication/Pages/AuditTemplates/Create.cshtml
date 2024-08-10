@@ -64,6 +64,10 @@
                                 templateId = result.id;
                                 alert('Template saved successfully');
                             }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error saving template: ', xhr.responseText);
+                            alert('Failed to save template, please try again.');
                         }
                     });
                 }  else {

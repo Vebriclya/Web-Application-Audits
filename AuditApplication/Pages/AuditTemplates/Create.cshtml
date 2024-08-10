@@ -43,6 +43,41 @@
 @section Scripts {
     @{ await Html.RenderPartialAsync("Shared/_ValidationScriptsPartial"); }
     <script>
+        
+        new Sortable(document.getElementById('templateContent'), {
+            animation: 150,
+            ghostClass: 'blue-background-class',
+            onEnd: function (evt) {
+                let items = $('.sortable-item').map(function(index) {
+                    return {
+                        id: $(this).data('id'),
+                        type: $(this).hasClass('section') ? 'section' : 'question',
+                        order: index
+                    };
+                }).get();
+                
+                $.ajax({
+                    url: '?handler=UpdateOrder',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(items),
+                    headers: {
+                        "RequestVerificationToken":
+                            $('input:hidden[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                        if (result.success) {
+                            console.log('Order updated successfully');
+                        } else {
+                            console.error('Failed to update order: ', result.message);
+                        }
+                    },
+                    error: function(xhr, status, error){
+                        console.error("Error updating order: ", error);
+                    }
+                });
+            }
+        });
    
         function addSection() {
             var sectionIndex = $('.section').length;
@@ -70,6 +105,7 @@
         function remove(button) {
             $(button).closest('.section, .question').remove();
         }
+    
     </script>
-}
+    }
 

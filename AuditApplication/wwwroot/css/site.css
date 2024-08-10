@@ -20,3 +20,58 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.form-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  margin-right: 10px;
+  min-width: 120px;
+}
+
+.button-group {
+  margin-bottom: 20px;
+}
+
+.input-group {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.input-group input {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.sortable-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sortable-item {
+  padding: 10px;
+  margin-bottom: 5px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sortable-item.section {
+  font-weight: bold;
+}
+
+.delete-btn {
+  cursor: pointer;
+  color: red;
+}

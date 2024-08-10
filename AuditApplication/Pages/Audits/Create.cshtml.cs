@@ -38,10 +38,21 @@ namespace AuditApplication.Pages.Audits
                 return Page();
             }
 
-            _context.Audits.Add(Audit);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Audits.Add(Audit);
+                await _context.SaveChangesAsync();
 
-            return RedirectToPage("./Index");
+                return RedirectToPage("./Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, "An error occurred while saving the audit template, please try again.");
+                return Page();
+            }
+            
+
+            
         }
     }
 }

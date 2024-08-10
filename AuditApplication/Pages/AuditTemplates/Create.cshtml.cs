@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using AuditApplication.Data;
 using AuditApplication.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AuditApplication.Pages.AuditTemplates
 {
     public class CreateModel : PageModel
     {
         private readonly AuditApplication.Data.AuditContext _context;
+        private readonly ILogger<CreateModel> _logger;
 
-        public CreateModel(AuditApplication.Data.AuditContext context)
+        public CreateModel(AuditContext context, ILogger<CreateModel> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public IActionResult OnGet()
@@ -37,26 +40,44 @@ namespace AuditApplication.Pages.AuditTemplates
         {
             if (!ModelState.IsValid)
             {
+                foreach (var modelState in ModelState.Values)
+                {
+                    foreach (var error in modelState.Errors)
+                    {
+                        _logger.LogError($"Validation error: {error.ErrorMessage}");
+                    }
+                }
                 return Page();
             }
 
-            _context.AuditTemplates.Add(AuditTemplate);
-            await _context.SaveChangesAsync();
-
-            foreach (var section in Sections)
+            try
             {
-                section.AuditTemplateId = AuditTemplate.Id;
-                _context.Sections.Add(section);
-            }
-            await _context.SaveChangesAsync();
+                _context.AuditTemplates.Add(AuditTemplate);
+                await _context.SaveChangesAsync();
 
-            foreach (var question in Questions)
-            {
-                _context.Questions.Add(question);
+                foreach (var section in Sections)
+                {
+                    section.AuditTemplateId = AuditTemplate.Id;
+                    _context.Sections.Add(section);
+                }
+
+                await _context.SaveChangesAsync();
+
+                foreach (var question in Questions)
+                {
+                    _context.Questions.Add(question);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return RedirectToPage("./Index");
             }
-            await _context.SaveChangesAsync();
-            
-            return RedirectToPage("./Index");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error saving audit template: {ex.Message}");
+                ModelState.AddModelError(string.Empty, "An error occurred while saving the audit template, please try again.");
+                return Page();
+            }
         }
     }
 }

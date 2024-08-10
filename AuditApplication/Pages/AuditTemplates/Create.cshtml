@@ -43,10 +43,12 @@
 @section Scripts {
     @{ await Html.RenderPartialAsync("Shared/_ValidationScriptsPartial"); }
     <script>
+   
         function addSection() {
             var sectionHtml = `
             <div class="section">
                 <input name="Sections[${$('.section').length}].Name" class="form-control" placeholder="Section Name" />
+                <button type="button" onclick="remove(this)">Remove Section</button>
             </div>`;
             $('#sections').append(sectionHtml);
         }
@@ -58,10 +60,14 @@
                 <select name="Questions[${$('.question').length}].SectionId" class="form-control">
                     ${$('.section').map((i, section) => `<option value="${i}">${$(section).find('input').val()}</option>`).get().join('')}
                 </select>
+                <button type="button" onclick="remove(this)">Remove Question</button>
             </div>`;
             $('#questions').append(questionHtml);
         }
         
+        function remove(button) {
+            $(button).closest('.section').remove();
+        }
     </script>
 }
 

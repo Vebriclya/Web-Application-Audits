@@ -62,20 +62,34 @@ namespace AuditApplication.Pages.AuditTemplates
             public string Name { get; set; }
         }
 
-        public async Task<IActionResult> OnPostAddSectionAsync([FromBody] Section section)
+        public async Task<IActionResult> OnPostAddSectionAsync([FromBody] AddSectionRequest request)
         {
-            if (string.IsNullOrWhiteSpace(section.Name))
+            if (string.IsNullOrWhiteSpace(request.Name))
             {
-                return new JsonResult(new { success = false, message = "Section name cannot be empty." });
+                return BadRequest("Section name is required.");
             }
-            if (!ModelState.IsValid)
+            var template = await _context.AuditTemplates.FindAsync(request.AuditTemplateId);
+            if (template == null)
             {
-                return BadRequest(ModelState);
+                return BadRequest(new { message = "Invalid template id." });
             }
-
+            
+            var section = new Section
+            {
+                Name = request.Name, 
+                AuditTemplateId = request.AuditTemplateId
+            };
+            
             _context.Sections.Add(section);
             await _context.SaveChangesAsync();
+            
             return new JsonResult(new { success = true, id = section.Id });
+        }
+
+        public class AddSectionRequest
+        {
+            public string Name { get; set; }
+            public int AuditTemplateId { get; set; }
         }
         
         public async Task<IActionResult> OnPostUpdateSectionAsync([FromBody] UpdateItemRequest request)

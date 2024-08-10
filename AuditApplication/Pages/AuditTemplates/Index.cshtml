@@ -21,17 +21,33 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.AuditTemplate) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+    @foreach (var item in Model.AuditTemplate) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td>
+            <ul>
+                @foreach (var section in item.Sections)
+                {
+                <li>
+                    @(section.Name)
+                    <ul>
+                        @foreach (var question in section.Questions)
+                        {
+                        <li>@question.Text</li>
+                        }
+                    </ul>
+                </li>
+                }
+            </ul>
+        </td>
+        <td>
+            <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+            <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+            <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+        </td>
+    </tr>
+    }
     </tbody>
 </table>

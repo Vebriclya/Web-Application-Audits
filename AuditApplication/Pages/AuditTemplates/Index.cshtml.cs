@@ -23,7 +23,10 @@ namespace AuditApplication.Pages.AuditTemplates
 
         public async Task OnGetAsync()
         {
-            AuditTemplate = await _context.AuditTemplates.ToListAsync();
+            AuditTemplate = await _context.AuditTemplates
+                .Include(at => at.Sections)
+                .ThenInclude(s => s.Questions)
+                .ToListAsync();
         }
     }
 }

@@ -23,12 +23,13 @@
     <tbody>
     @foreach (var item in Model.AuditTemplate) {
         <tr>
-            <td>
+            <td class="align-middle fw-bold">
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+            <td class="d-flex justify-content-end gap-1">
+                <form method="get" style="display: inline">
+                    <button type="submit" class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-id="@item.Id">View/Edit</button>
+                </form>
                 <button class="btn btn-danger btn-sm delete-template" data-id="@item.Id" data-name="@item.Name">Delete</button>
             </td>
         </tr>

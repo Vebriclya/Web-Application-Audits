@@ -40,13 +40,13 @@
     </div>
 
     <div id="sectionInput" class="row mb-3" style="display:none;">
-        <div class="col-md-2">
+        <div class="col-md-2 d-flex align-items-center fw-bold">
             <label for="sectionName">Section Title:</label>
         </div>
         <div class="col-md-6">
             <input type="text" id="sectionName" class="form-control" placeholder="Section Title"/>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 d-flex justify-content-end gap-1">
             <button id="saveSection" class="btn btn-success">Save</button>
             <button id="cancelSection" class="btn btn-danger">Cancel</button>
         </div>
@@ -172,7 +172,7 @@
                             <div class="col-md-8">
                                 <${type === 'section' ? 'h4' : 'p'}>${name}</${type === 'section' ? 'h4' : 'p'}>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-4 d-flex justify-content-end gap-1">
                                 <a href="#" class="edit-item" data-type="${type}">Edit</a>
                                 <a href="#" class="delete-item" data-type="${type}">❌</a>
                             </div>
@@ -195,10 +195,10 @@
             console.log(`ENTERED ADD QUESTION, Section Id: ${sectionId}`);
             let questionInput = `
                     <div class="question-input row mt-2">
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             <input type="text" class="form-control question-text" placeholder="Enter question" />
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4 d-flex justify-content-end fw-bold gap-1">
                             <button class="btn btn-success save-question" data-section-id="${sectionId}">Save</button>
                             <button class="btn btn-danger cancel-question">Cancel</button>
                         </div>

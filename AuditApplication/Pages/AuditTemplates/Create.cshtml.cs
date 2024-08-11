@@ -94,27 +94,49 @@ namespace AuditApplication.Pages.AuditTemplates
         
         public async Task<IActionResult> OnPostUpdateSectionAsync([FromBody] UpdateItemRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.Text))
+            {
+                return new JsonResult(new { success = false, message = "Section name cannot be empty." });
+            }
+
             var section = await _context.Sections.FindAsync(request.Id);
             if (section == null)
             {
                 return NotFound();
             }
-            section.Name = request.Text;
-            await _context.SaveChangesAsync();
-            return new JsonResult(new { success = true });
-        }
-        
-        public async Task<IActionResult> OnDeleteSectionAsync(int id)
-        {
-            var section = await _context.Sections.FindAsync(id);
-            if (section != null)
+            section.Name = request.Text.Trim();
+            try
             {
-                _context.Sections.Remove(section);
                 await _context.SaveChangesAsync();
                 return new JsonResult(new { success = true });
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating section");
+                return new JsonResult(new { success = false, message = "An error occurred while updating the section." });
+            }
+        }
+        
+        public async Task<IActionResult> OnPostDeleteSectionAsync([FromBody] int id)
+        {
+            try
+            {
+                var section = await _context.Sections.FindAsync(id);
+                if (section == null)
+                {
+                    return new JsonResult(new { success = false, message = "Section not found." });
+                }
 
-            return NotFound();
+                _context.Sections.Remove(section);
+                await _context.SaveChangesAsync();
+        
+                return new JsonResult(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting section with ID {id}");
+                return new JsonResult(new { success = false, message = "An error occurred while deleting the section." });
+            }
         }
 
         public async Task<IActionResult> OnPostAddQuestionAsync([FromBody] Question question)

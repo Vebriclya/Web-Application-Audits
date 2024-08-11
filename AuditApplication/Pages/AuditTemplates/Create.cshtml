@@ -102,6 +102,11 @@
         $('#addSection').click(function() {
             $('#sectionInput').show();
         });
+
+        $('#cancelSection').click(function() {
+            $('#sectionInput').hide();
+            $('#sectionName').val('');
+        });
         
         function addItem(type, name, containerId){
             if (name && (type === 'section' ? templateId : true)) {
@@ -190,42 +195,42 @@
             let questionText = $(this).closest('.question-input').find('.question-text').val().trim();
             addItem('question', questionText, sectionId);
         });
-           
-        $(document).on('click', '.edit-item', function () {
+
+        $(document).on('click', '.edit-item', function (e) {
             e.preventDefault();
             let item = $(this).closest('.card');
             let type = $(this).data('type');
             let text = item.find(type === 'section' ? 'h4' : 'p').text().trim();
-            
+
             item.hide();
             item.after(`
-                <div class="edit-${type}-form mb-3">
-                    <input type="text" class="form-control ${type}-name-edit" value="${text}">
-                    <button class="btn btn-success save-${type}-edit mt-2" data-id="${item.data('id')}">Save</button>
-                    <button class="btn btn-danger cancel-${type}-edit mt-2">Cancel</button>
-                </div>
-            `);
+        <div class="edit-${type}-form mb-3">
+            <input type="text" class="form-control ${type}-name-edit" value="${text}">
+            <button class="btn btn-success save-${type}-edit mt-2" data-id="${item.data('id')}">Save</button>
+            <button class="btn btn-danger cancel-${type}-edit mt-2">Cancel</button>
+        </div>
+    `);
         });
-        
-        $(document).on('click', '.save-section-edit', '.save-question-edit', function(){
+
+        $(document).on('click', '.save-section-edit, .save-question-edit', function(){
             let type = $(this).hasClass('save-section-edit') ? 'section' : 'question';
             let newName = $(`.${type}-name-edit`).val().trim();
             let id = $(this).data('id');
-            
+
             if (newName) {
                 $.ajax({
                     url: `?handler=Update${type.charAt(0).toUpperCase() + type.slice(1)}`,
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({ id: id, name: newName}),
+                    data: JSON.stringify({ id: id, text: newName }),
                     headers: {
                         "RequestVerificationToken":
                             $('input:hidden[name="__RequestVerificationToken"]').val()
                     },
                     success: function (result) {
                         if (result.success) {
-                            $(`#${type}=${id}`).find(type === 'section' ? 'h4' : 'p').text(newName);
-                            $(`#${type}=${id}`).show();
+                            $(`#${type}-${id}`).find(type === 'section' ? 'h4' : 'p').text(newName);
+                            $(`#${type}-${id}`).show();
                             $(`.edit-${type}-form`).remove();
                         } else {
                             alert(result.message || `Failed to update ${type}`);
@@ -239,23 +244,24 @@
             } else {
                 alert(`Please enter a ${type} name.`);
             }
-        });
+});
         
         $(document).on('click', '.cancel-section-edit', '.cancel-question-edit', function(){
             let type = $(this).hasClass('cancel-section-edit') ? 'section' : 'question';
             $(`.edit-${type}-form`).prev().show();
             $(`.edit-${type}-form`).remove();
         });
-        
+
         $(document).on('click', '.delete-item', function (e) {
             e.preventDefault();
             let item = $(this).closest('.card');
             let type = $(this).data('type');
-            
+            let id = item.data('id');
+
             $.ajax({
                 url: `?handler=Delete${type.charAt(0).toUpperCase() + type.slice(1)}`,
                 type: 'POST',
-                data: JSON.stringify({id: item.data('id')}),
+                data: JSON.stringify(id),
                 contentType: 'application/json',
                 headers: {
                     "RequestVerificationToken":

@@ -17,79 +17,79 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = AuditApplication
 build_property.RootNamespace = AuditApplication
-build_property.ProjectDir = C:\Users\alex.sherman.STEPPINGSTONES\Desktop\Audit Application\AuditWebApplication\AuditApplication\
+build_property.ProjectDir = C:\Users\Alexandria\Desktop\Repos\AuditApplication\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\alex.sherman.STEPPINGSTONES\Desktop\Audit Application\AuditWebApplication\AuditApplication
+build_property.MSBuildProjectDirectory = C:\Users\Alexandria\Desktop\Repos\AuditApplication
 build_property._RazorSourceGeneratorDebug = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Audits/Create.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/Audits/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRzXENyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Audits/Delete.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/Audits/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRzXERlbGV0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Audits/Details.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/Audits/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Audits/Edit.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/Audits/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRzXEVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Audits/Index.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/Audits/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/AuditTemplates/Create.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/AuditTemplates/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRUZW1wbGF0ZXNcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/AuditTemplates/Delete.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/AuditTemplates/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRUZW1wbGF0ZXNcRGVsZXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/AuditTemplates/Details.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/AuditTemplates/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRUZW1wbGF0ZXNcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/AuditTemplates/Edit.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/AuditTemplates/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRUZW1wbGF0ZXNcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/AuditTemplates/Index.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/AuditTemplates/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRUZW1wbGF0ZXNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Error.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXJyb3IuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Index.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Privacy.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJpdmFjeS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Shared/_ValidationScriptsPartial.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/_ViewImports.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/_ViewStart.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/alex.sherman.STEPPINGSTONES/Desktop/Audit Application/AuditWebApplication/AuditApplication/Pages/Shared/_Layout.cshtml]
+[C:/Users/Alexandria/Desktop/Repos/AuditApplication/Pages/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-668igik2gv

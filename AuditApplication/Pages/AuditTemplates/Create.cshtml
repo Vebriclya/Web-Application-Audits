@@ -6,34 +6,36 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
+<h2>Create new template</h2>
 
 <div class="container">
-    <h2>Create new template</h2>
     
-    <div class="row mb-3 justify-content-end">
-        <div class="col-auto">
-            <button id="addSection" class="btn btn-primary">Add Section</button>
-        </div>
-    </div>
-    
-    <div class="row mb-3" id="templateTitleRow">
-        <div class="col-md-2">
+    <div class="row mb-3 pt-5" id="templateTitleRow">
+        <div class="col-md-2 d-flex align-items-center fw-bold">
             <label for="templateTitle">Template Title:</label>
         </div>
         <div class="col-md-8">
             <input type="text" class="form-control" id="templateTitle" placeholder="Enter template title">
         </div>
-        <div class="col-md-2">
+        <div class="col-md-2 d-flex flex-row-reverse">
             <button id="saveTemplate" class="btn btn-success">Save</button>
         </div>
     </div>
     
-    <div id="templateTitleDisplay" class="row mb-3 align-items-center" style="display:none;">
+    <div id="templateTitleDisplay" class="row mb-3 pt-5 align-items-center" style="display:none;">
         <div class="col-md-10">
             <h3 id="displayedTemplateTitle" class="mb-0"></h3>
         </div>
-        <div class="col-md-2 text-right">
+        <div class="col-md-2 d-flex flex-row-reverse">
             <a href="#" id="editTemplateTitle">Edit</a>
+        </div>
+    </div>
+    
+    <div id="templateContent"></div>
+
+    <div class="row mb-3 justify-content-end" id="addSectionRow">
+        <div class="col-auto">
+            <button id="addSection" class="btn btn-primary">Add Section</button>
         </div>
     </div>
 
@@ -50,7 +52,6 @@
         </div>
     </div>
     
-    <div id="templateContent"></div>
 </div>
 
 <div>

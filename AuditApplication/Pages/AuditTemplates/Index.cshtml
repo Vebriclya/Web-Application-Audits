@@ -27,22 +27,6 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                <ul>
-                    @foreach (var section in item.Sections)
-                    {
-                        <li>
-                            @(section.Name)
-                            <ul>
-                                @foreach (var question in section.Questions)
-                                {
-                                    <li>@question.Text</li>
-                                }
-                            </ul>
-                        </li>
-                    }
-                </ul>
-            </td>
-            <td>
                 <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
                 <button class="btn btn-danger btn-sm delete-template" data-id="@item.Id" data-name="@item.Name">Delete</button>

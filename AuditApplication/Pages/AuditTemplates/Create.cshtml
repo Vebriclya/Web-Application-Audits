@@ -7,7 +7,7 @@
 }
 
 <h2>Create new template</h2>
-<div class="row mb-3">
+<div class="row mb-3 justify-content-end">
     <div class="col-md-4">
         <select id="existingTemplates" class="form-control">
             <option value="">-- Select an existing template --</option>
@@ -329,17 +329,24 @@
             url: '?handler=ExistingTemplates',
             type: 'GET', 
             success: function(templates){
+            console.log("AJAX FOR DROPDOWNS. Templates received: ", templates);
                 templates.forEach(function(template){
                     $('#existingTemplates').append($('<option>', {
                         value: template.id,
                         text: template.name
                     }));
                 });
+                console.log("Dropdown populated.")
+            }, 
+            error: function (xhr, status, error) {
+                console.log("Error fetching templates: ", error);
             }
         });
         
         $('#loadTemplate').click(function() {
-            let selectedTemplateId = $('existingTemplates').val();
+            console.log("Load template button pressed.");
+            let selectedTemplateId = $('#existingTemplates').val();
+            console.log("Selected template ID:", selectedTemplateId);
             if(selectedTemplateId){
                 $.ajax({
                     url: '?handler=DuplicateTemplate',
@@ -350,18 +357,19 @@
                         "RequestVerificationToken":
                             $('input:hidden[name="__RequestVerificationToken"]').val()
                     },
-                    success: function(result) {
-                        if (result.success) {
-                            templateId = result.id;
-                            $('#templateTitle').val(result.name);
+                    success: function(results) {
+                        console.log("Duplication results:", results);
+                        if (results.success) {
+                            templateId = results.id;
+                            $('#templateTitle').val(results.name);
                             $('#templateContent').empty();
-                            result.sections.forEach(function(section) {
+                            results.sections.forEach(function(section) {
                                 let sectionHtml = createItemHtml('section', section.id, section.name);
                                 $('#templateContent').append(sectionHtml);
                                 section.questions.forEach(function(question) {
-                                let questionHtml = createItemHtml('question', question.id, question.text);
-                                $(`#section=${section.id} .questions-container`).append(questionHtml);
-                            });
+                                    let questionHtml = createItemHtml('question', question.id, question.text);
+                                    $(`#section-${section.id} .questions-container`).append(questionHtml);
+                                });
                         });
                         alert('Template loaded successfully');
                     }

@@ -2,52 +2,115 @@
 @model AuditApplication.Pages.AuditTemplates.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Templates";
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<h1>Audit Templates</h1>
 
 <p>
     <a asp-page="Create">Create New</a>
 </p>
 <table class="table">
     <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.AuditTemplate[0].Name)
-            </th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.AuditTemplate[0].Name)
+        </th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
     @foreach (var item in Model.AuditTemplate) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Name)
-        </td>
-        <td>
-            <ul>
-                @foreach (var section in item.Sections)
-                {
-                <li>
-                    @(section.Name)
-                    <ul>
-                        @foreach (var question in section.Questions)
-                        {
-                        <li>@question.Text</li>
-                        }
-                    </ul>
-                </li>
-                }
-            </ul>
-        </td>
-        <td>
-            <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-            <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-            <button class="btn btn-danger btn-sm delete-template" data-id="@item.Id" data-name="@item.Name">Delete</button>
-        </td>
-    </tr>
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                <ul>
+                    @foreach (var section in item.Sections)
+                    {
+                        <li>
+                            @(section.Name)
+                            <ul>
+                                @foreach (var question in section.Questions)
+                                {
+                                    <li>@question.Text</li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                </ul>
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+                <button class="btn btn-danger btn-sm delete-template" data-id="@item.Id" data-name="@item.Name">Delete</button>
+            </td>
+        </tr>
     }
     </tbody>
 </table>
+
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete "<span id="templateNameToDelete"></span>"?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            let templateIdToDelete;
+            
+            $('.delete-template').click(function () {
+                templateIdToDelete = $(this).data('id');
+                let templateName = $(this).data('name');
+                $('#templateNameToDelete').text(templateName);
+                $('#deleteConfirmModal').modal('show');
+            });
+            
+            $('#confirmDelete').click(function () {
+                $.ajax({
+                    url: '?handler=DeleteTemplate',
+                    type: 'POST',
+                    data: JSON.stringify(templateIdToDelete),
+                    contentType: 'application/json',
+                    headers: {
+                        "RequestVerificationToken":
+                            $('input:hidden[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result){
+                        if (result.success){
+                            location.reload();
+                        } else {
+                            alert('Failed to delete template. Please try again.');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error deleting template: ', xhr.responseText);
+                        alert('An error occurred while deleting the template. Please try again.');
+                    }
+                });
+                $('#deleteConfirmModal').modal('hide');
+            });
+        });
+        
+    </script>
+}

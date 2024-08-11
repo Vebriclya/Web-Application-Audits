@@ -160,44 +160,6 @@
                 alert(`Please enter ${type} text.`)
                 if (callback) callback(false);
             }
-            @*if (name && (type === 'section' ? templateId : true)) {
-                let url = type === 'section' ? '?handler=AddSection' : '?handler=AddQuestion';
-                let data = type === 'section' 
-                    ? { name: name, auditTemplateId: templateId }
-                    : { text: name, sectionId: containerId };
-                console.log(`ENTERED FIRST IF BLOCK INSIDE ADDITEM. URL: ${url}, DATA: (SECTION... name: ${data.name} / auditTemplateId: ${data.auditTemplateId}) (Question... text: ${data.text} sectionId: ${data.sectionId})`)
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(data),
-                    headers: {
-                        "RequestVerificationToken":
-                            $('input:hidden[name="__RequestVerificationToken"]').val()
-                    },
-                    success: function (result) {
-                        console.log("Success");
-                        if (result.success) {
-                            let newItemHtml = createItemHtml(type,  result.id, name);
-                            if (type === 'section') {
-                                $('#templateContent').append(newItemHtml);
-                            } else {
-                                $(`section-${containerId} .questions-container`).append(newItemHtml);
-                            }
-                            $(`#${type}Input`).hide();
-                            $(`#${type}Name`).val('');
-                        } else {
-                            alert(result.message || `Failed to add ${type}`);
-                        }
-                    }, 
-                    error: function (xhr, status, error) {
-                        console.log(`You've hit the error. Error adding ${type}`, xhr.responseText);
-                        alert(`Failed to add ${type}. Please try again.`);
-                    }
-                });
-            } else {
-                alert(`Please enter ${type} text`);
-            }*@
         }
         
         function createItemHtml(type, id, name) {
@@ -242,7 +204,6 @@
                 `;
             $(this).siblings('.questions-container').append(questionInput);
         });
-
 
         $(document).on('click', '.save-question', function() {
             let sectionId = $(this).data('section-id');

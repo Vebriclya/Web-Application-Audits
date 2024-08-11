@@ -176,17 +176,17 @@ namespace AuditApplication.Pages.AuditTemplates
             return new JsonResult(new { success = true });
         }
         
-        public async Task<IActionResult> OnDeleteQuestionAsync(int id)
+        public async Task<IActionResult> OnPostDeleteQuestionAsync([FromBody]int id)
         {
             var question = await _context.Questions.FindAsync(id);
-            if (question != null)
+            if (question == null)
             {
-                _context.Questions.Remove(question);
-                await _context.SaveChangesAsync();
-                return new JsonResult(new { success = true });
+                return new JsonResult(new { success = false, message = "Question not found." });
             }
-
-            return NotFound();
+            
+            _context.Questions.Remove(question);
+            await _context.SaveChangesAsync();
+            return new JsonResult(new { success = true });
         }
         
         public class UpdateItemRequest

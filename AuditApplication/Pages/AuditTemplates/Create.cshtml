@@ -164,9 +164,10 @@
         }
         
         function createItemHtml(type, id, name) {
+            let itemClass = type === 'section' ? 'card mb-3' : 'mb-3 question-item';
             return `
-                <div class="card mb-3 ${type}-item" data-id="${id}" id="${type}-${id}" data-type="${type}">
-                    <div class="card-body">
+                <div class="${itemClass} ${type}-item" data-id="${id}" id="${type}-${id}" data-type="${type}">
+                    <div class="${type === 'section' ? 'card-body' : ''}">
                         <div class="row">
                             <div class="col-md-8">
                                 <${type === 'section' ? 'h4' : 'p'}>${name}</${type === 'section' ? 'h4' : 'p'}>
@@ -220,7 +221,7 @@
 
         $(document).on('click', '.edit-item', function (e) {
             e.preventDefault();
-            let item = $(this).closest('.card');
+            let item = $(this).closest('.question-item, .section-item');
             let type = $(this).data('type');
             let text = item.find(type === 'section' ? 'h4' : 'p').text().trim();
 
@@ -276,7 +277,7 @@
 
         $(document).on('click', '.delete-item', function (e) {
             e.preventDefault();
-            let item = $(this).closest('.card');
+            let item = $(this).closest('.question-item, .section-item');
             let type = $(this).data('type');
             let id = item.data('id');
 

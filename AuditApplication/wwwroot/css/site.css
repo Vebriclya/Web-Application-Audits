@@ -75,3 +75,12 @@ body {
   cursor: pointer;
   color: red;
 }
+
+.question-item{
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.question-item:last-child{
+  border-bottom: none;
+}

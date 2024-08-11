@@ -178,8 +178,10 @@
                             </div>
                         </div>
                     ${type === 'section' ? `
-                        <button class="btn btn-secondary add-question mt-2">Add Question</button>
                         <div class="questions-container"></div>
+                        <div class="text-end mt-2">
+                            <button class="btn btn-secondary add-question mt-2">Add Question</button>
+                        </div>
                     ` : ''}
                 </div>
             </div>
@@ -191,6 +193,7 @@
         });
 
         $(document).on('click', '.add-question', function() {
+            let sectionItem = $(this).closest('.section-item');
             let sectionId = $(this).closest('.section-item').data('id');
             console.log(`ENTERED ADD QUESTION, Section Id: ${sectionId}`);
             let questionInput = `
@@ -204,7 +207,11 @@
                         </div>
                     </div>
                 `;
-            $(this).siblings('.questions-container').append(questionInput);
+            $(this).parent().before(questionInput);
+            
+            $('html, body').animate({
+                scrollTop: sectionItem.find('.question-input:last').offset().top - 100
+                }, 500);
         });
 
         $(document).on('click', '.save-question', function() {

@@ -7,9 +7,19 @@
 }
 
 <h2>Create new template</h2>
+<div class="row mb-3">
+    <div class="col-md-4">
+        <select id="existingTemplates" class="form-control">
+            <option value="">-- Select an existing template --</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button id="loadTemplate" class="btn btn-secondary">Load Template</button>
+    </div>
+</div>
 
 <div class="container">
-    
+
     <div class="row mb-3 pt-5" id="templateTitleRow">
         <div class="col-md-2 d-flex align-items-center fw-bold">
             <label for="templateTitle">Template Title:</label>
@@ -21,7 +31,7 @@
             <button id="saveTemplate" class="btn btn-success">Save</button>
         </div>
     </div>
-    
+
     <div id="templateTitleDisplay" class="row mb-3 pt-5 align-items-center" style="display:none;">
         <div class="col-md-10">
             <h3 id="displayedTemplateTitle" class="mb-0"></h3>
@@ -30,7 +40,7 @@
             <a href="#" id="editTemplateTitle">Edit</a>
         </div>
     </div>
-    
+
     <div id="templateContent"></div>
 
     <div class="row mb-3 justify-content-end" id="addSectionRow">
@@ -51,7 +61,7 @@
             <button id="cancelSection" class="btn btn-danger">Cancel</button>
         </div>
     </div>
-    
+
 </div>
 
 <div>
@@ -315,7 +325,56 @@
             $(this).closest('.question-input').remove();
         });
         
+        $.ajax({
+            url: '?handler=ExistingTemplates',
+            type: 'GET', 
+            success: function(templates){
+                templates.forEach(function(template){
+                    $('#existingTemplates').append($('<option>', {
+                        value: template.id,
+                        text: template.name
+                    }));
+                });
+            }
+        });
+        
+        $('#loadTemplate').click(function() {
+            let selectedTemplateId = $('existingTemplates').val();
+            if(selectedTemplateId){
+                $.ajax({
+                    url: '?handler=DuplicateTemplate',
+                    type: 'POST',
+                    data: JSON.stringify(selectedTemplateId),
+                    contentType: 'application/json',
+                    headers: {
+                        "RequestVerificationToken":
+                            $('input:hidden[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                        if (result.success) {
+                            templateId = result.id;
+                            $('#templateTitle').val(result.name);
+                            $('#templateContent').empty();
+                            result.sections.forEach(function(section) {
+                                let sectionHtml = createItemHtml('section', section.id, section.name);
+                                $('#templateContent').append(sectionHtml);
+                                section.questions.forEach(function(question) {
+                                let questionHtml = createItemHtml('question', question.id, question.text);
+                                $(`#section=${section.id} .questions-container`).append(questionHtml);
+                            });
+                        });
+                        alert('Template loaded successfully');
+                    }
+                },
+                error: function(xhr, status, error){
+                    console.log('Error loading template: ', xhr.responseTest);
+                    alert('Failed to load template. Please try again.');
+                }
+            });
+        } else {
+            alert('Please select a template to load');
+        }
+    });
     });
     </script>
 }
- 

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using AuditApplication.Data;
 using AuditApplication.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 
@@ -194,6 +195,64 @@ namespace AuditApplication.Pages.AuditTemplates
             public int Id { get; set; }
             public string Text { get; set; }
         }
-        
+
+        public JsonResult OnGetExistingTemplates()
+        {
+            var templates = _context.AuditTemplates
+                .Select(t => new { id = t.Id, name = t.Name })
+                .ToList();
+            return new JsonResult(templates);
+        }
+
+        public async Task<IActionResult> OnPostDuplicateTemplateAsync([FromBody] int id)
+        {
+            var existingTemplate = await _context.AuditTemplates
+                .Include(t => t.Sections)
+                .ThenInclude(s => s.Questions)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (existingTemplate == null)
+            {
+                return NotFound();
+            }
+
+            var newTemplate = new AuditTemplate
+            {
+                Name = $"Copy of {existingTemplate.Name}",
+                Sections = existingTemplate.Sections.Select(s => new Section
+                {
+                    Name = s.Name,
+                    Order = s.Order,
+                    Questions = s.Questions.Select(q => new Question
+                    {
+                        Text = q.Text,
+                        Order = q.Order
+                    }).ToList()
+                }).ToList()
+            };
+
+            _context.AuditTemplates.Add(newTemplate);
+            await _context.SaveChangesAsync();
+
+            var results = new
+            {
+                success = true,
+                id = newTemplate.Id,
+                name = newTemplate.Name,
+                sections = newTemplate.Sections.Select(s => new
+                {
+                    id = s.Id,
+                    name = s.Name,
+                    questions = s.Questions.Select(q => new
+                    {
+                        id = q.Id,
+                        text = q.Text
+                    })
+                })
+            };
+
+            return new JsonResult(results);
+        }
+
     }
 }

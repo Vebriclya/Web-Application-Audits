@@ -139,21 +139,29 @@ namespace AuditApplication.Pages.AuditTemplates
             }
         }
 
-        public async Task<IActionResult> OnPostAddQuestionAsync([FromBody] Question question)
+        public async Task<IActionResult> OnPostAddQuestionAsync([FromBody] AddQuestionRequest request)
         {
-            if (string.IsNullOrWhiteSpace(question.Text))
+            if (string.IsNullOrWhiteSpace(request.Text))
             {
                 return new JsonResult(new { success = false, message = "Question text cannot be empty." });
             }
-            
-            if (!ModelState.IsValid)
+
+            var question = new Question
             {
-                return BadRequest(ModelState);
-            }
+                Text = request.Text,
+                SectionId = request.SectionId,
+                Order = _context.Questions.Count(q => q.SectionId == request.SectionId) + 1
+            };
 
             _context.Questions.Add(question);
             await _context.SaveChangesAsync();
             return new JsonResult(new { success = true, id = question.Id });
+        }
+
+        public class AddQuestionRequest
+        {
+            public string Text { get; set; }
+            public int SectionId { get; set; }
         }
         
         public async Task<IActionResult> OnPostUpdateQuestionAsync([FromBody] UpdateItemRequest request)

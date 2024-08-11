@@ -109,12 +109,59 @@
         });
         
         function addItem(type, name, containerId){
-            if (name && (type === 'section' ? templateId : true)) {
+            console.log("ENTERED ADDITEM");
+            if (name) {
+                let url = type === 'section' ? '?handler=AddSection' : '?handler=AddQuestion';
+                let data = type === 'section'
+                    ? { name: name, auditTemplateId: templateId }
+                    : { text: name, sectionId: parseInt(containerId) };
+                    
+                console.log(`Sending request: URL: ${url}, DATA: ${data}`);
+                if(data.auditTemplateId){
+                    console.log(`Data is a ${type}, name: ${data.name}, auditTemplateId: ${data.auditTemplateId}`);
+                } else {
+                    console.log(`Data is a ${type}, text: ${data.text}, sectionId: ${data.sectionId}`)
+                }
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    headers: {
+                        "RequestVerificationToken":
+                            $('input:hidden[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result){
+                        console.log("Success");
+                        if (result.success){
+                            let newItemHtml = createItemHtml(type,  result.id, name);
+                            if (type === 'section'){
+                                console.log("type was a section");
+                                $('#templateContent').append(newItemHtml);
+                            } else {
+                                console.log("type was a question");
+                                $(`#section-${containerId} .questions-container`).append(newItemHtml);
+                            }
+                            $(`#${type}Input`).hide();
+                            $(`#${type}Name`).val('');
+                        } else {
+                            alert(result.message || `Failed to add ${type}`);
+                        }
+                    }, 
+                    error: function (xhr, status, error){
+                        console.log(`Error adding ${type}:`, xhr.responseText);
+                        alert(`Failed to add ${type}. Please try again.`);
+                    }
+                });
+            }else {
+                alert(`Please enter ${type} text.`)
+            }
+            @*if (name && (type === 'section' ? templateId : true)) {
                 let url = type === 'section' ? '?handler=AddSection' : '?handler=AddQuestion';
                 let data = type === 'section' 
                     ? { name: name, auditTemplateId: templateId }
                     : { text: name, sectionId: containerId };
-                    
+                console.log(`ENTERED FIRST IF BLOCK INSIDE ADDITEM. URL: ${url}, DATA: (SECTION... name: ${data.name} / auditTemplateId: ${data.auditTemplateId}) (Question... text: ${data.text} sectionId: ${data.sectionId})`)
                 $.ajax({
                     url: url,
                     type: 'POST',
@@ -125,6 +172,7 @@
                             $('input:hidden[name="__RequestVerificationToken"]').val()
                     },
                     success: function (result) {
+                        console.log("Success");
                         if (result.success) {
                             let newItemHtml = createItemHtml(type,  result.id, name);
                             if (type === 'section') {
@@ -139,13 +187,13 @@
                         }
                     }, 
                     error: function (xhr, status, error) {
-                        console.error(`Error adding ${type}`, xhr.responseText);
+                        console.log(`You've hit the error. Error adding ${type}`, xhr.responseText);
                         alert(`Failed to add ${type}. Please try again.`);
                     }
                 });
             } else {
                 alert(`Please enter ${type} text`);
-            }
+            }*@
         }
         
         function createItemHtml(type, id, name) {
@@ -176,6 +224,7 @@
 
         $(document).on('click', '.add-question', function() {
             let sectionId = $(this).closest('.section-item').data('id');
+            console.log(`ENTERED ADD QUESTION, Section Id: ${sectionId}`);
             let questionInput = `
                     <div class="question-input row mt-2">
                         <div class="col-md-6">
@@ -187,12 +236,13 @@
                         </div>
                     </div>
                 `;
-            $(this).siblings('.questions-container').prepend(questionInput);
+            $(this).siblings('.questions-container').append(questionInput);
         });
 
         $(document).on('click', '.save-question', function() {
             let sectionId = $(this).data('section-id');
             let questionText = $(this).closest('.question-input').find('.question-text').val().trim();
+            console.log(`ENTERED SAVE-QUESTION, sectionId: ${sectionId}, questionText: ${questionText}`);
             addItem('question', questionText, sectionId);
         });
 
@@ -244,7 +294,7 @@
             } else {
                 alert(`Please enter a ${type} name.`);
             }
-});
+        });
         
         $(document).on('click', '.cancel-section-edit', '.cancel-question-edit', function(){
             let type = $(this).hasClass('cancel-section-edit') ? 'section' : 'question';

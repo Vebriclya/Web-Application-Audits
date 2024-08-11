@@ -45,7 +45,7 @@
         <td>
             <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
             <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-            <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+            <button class="btn btn-danger btn-sm delete-template" data-id="@item.Id" data-name="@item.Name">Delete</button>
         </td>
     </tr>
     }

@@ -6,34 +6,52 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
+<div id="templateSelection">
+    <select id="templateDropdown" asp-items="@(new SelectList(Model.AvailableTemplates, "Id", "Name"))">
+        <option>Select an audit template</option>
+    </select>
+    <button id="beginAudit" class="btn btn-primary">Begin</button>
+</div>
 
-<h4>Audit</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-            </div>
-            <div class="form-group">
-                <label asp-for="Audit.StartDate" class="control-label"></label>
-                <input asp-for="Audit.StartDate" class="form-control" />
-                <span asp-validation-for="Audit.StartDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Audit.CompletionDate" class="control-label"></label>
-                <input asp-for="Audit.CompletionDate" class="form-control" />
-                <span asp-validation-for="Audit.CompletionDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+<div id="auditContent" style="display: none">
+    
 </div>
 
 <div>
     <a asp-page="Index">Back to List</a>
 </div>
 
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            
+            $('#beginAudit').click(function () {
+                var templateId = $('templateDropdown').val();
+                if (templateId){
+                    $.ajax({
+                        url: '?handler=CreateAuditFromTemplate',
+                        type: 'POST',
+                        data: { templateId: templateId },
+                        headers: {
+                            "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (result){
+                            if (result.success){
+                                $('#templateSelection').hide();
+                                $('auditContent').html(result.auditHtml).show();
+                            } else {
+                                alert('Failed to create audit, please try again.');
+                            }
+                        },
+                        error: function () {
+                            alert('An error occurred. Please try again.');
+                        }
+                    });
+                } else {
+                    alert('Please select a template.');
+                }
+            });
+        });
+    </script>
+}

@@ -15,7 +15,12 @@ namespace AuditApplication.Pages.Audits
 {
     public class CreateModel : PageModel
     {
-        private readonly AuditApplication.Data.AuditContext _context;
+        private readonly AuditContext _context;
+
+        public CreateModel(AuditContext context)
+        {
+            _context = context;
+        }
         
         public List<AuditTemplate> AvailableTemplates { get;set; }
 

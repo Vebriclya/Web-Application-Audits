@@ -146,34 +146,56 @@ namespace AuditApplication.Pages.Audits
             sb.Append("<a href=\"#\" class=\"delete-question\">Delete</a>");
             
             //Radio Buttons
-            sb.Append("<div class=\"response-options\">");
-            foreach (var option in Enum.GetValues(typeof(RadioResponse)))
-            {
-                sb.AppendFormat(
-                    "<div class=\"form-check form-check-inline\">" +
-                    "<input class=\"form-check-input\" type=\"radio\" name=\"response-{0}\" " +
-                    "id=\"response-{0}-{1}\" value=\"{1}\">" +
-                    "<label class=\"form-check-label\" for=\"response-{0}-{1}\">{1}</label>" +
-                    "</div>", 
-                    question.Id, option);
-            }
-            sb.Append("</div>");
+            AppendRadioButtons(sb, question);
             
             // Attachment and Comments buttons
-            sb.Append("<div class=\"mt-2\">");
-            sb.Append("<button class=\"btn btn-secondary btn-sm attachments-btn\">Attachments</button>");
-            sb.Append("<button class=\"btn btn-secondary btn-sm comments-btn\">Comments</button>");
-            sb.Append("</div>");
+            AppendAttachmentAndCommentButtons(sb);
             
             // Comments accordion
-            sb.Append("<div class=\"comments-accordion mt-2\" style=\"display: none;\">");
-            sb.Append("<div class=\"card\"><div class=\"card-body\">");
-            sb.Append("<textarea class=\"form-control comment-text\" rows=\"3\"></textarea>");
-            sb.Append("<button class=\"btn btn-primary btn-sm mt-2 save-comment\">Save</button>");
-            sb.Append("</div></div></div>");
+            AppendCommentsAccordion(sb);
 
             sb.Append("</div>");
         }
 
+        private void AppendRadioButtons(StringBuilder sb, AuditQuestion question)
+        {
+            sb.Append("<div class='response-options'>");
+            foreach (var option in Enum.GetValues(typeof(RadioResponse)))
+            {
+                sb.AppendFormat(@"
+                    <div class='form-check form-check-inline'>
+                        <input class='form-check-input' type='radio' name='response-{0}' 
+                            id='response-{0}-{1}' value='{1}'>
+                        <label class='form-check-label' for='response-{0}-{1}'>{1}</label>
+                    </div>
+                ", question.Id, option);
+            }
+            sb.Append("</div>");
+        }
+
+        private void AppendAttachmentAndCommentButtons(StringBuilder sb)
+        {
+            sb.Append(@"
+                <div class='mt-2'>
+                    <button class='btn btn-secondary btn-sm attachments-btn'>Attachments</button>
+                    <button class='btn btn-secondary btn-sm comments-btn'>Comments</button>
+                </div>
+            "); 
+        }
+
+        private void AppendCommentsAccordion(StringBuilder sb)
+        {
+            sb.Append(@"
+                <div class='comments-accordion mt-2' style='display: none;'>
+                    <div class='card'>
+                        <div class='card-body'>
+                            <textarea class='form-control comment-text' rows='3'></textarea>
+                            <button class='btn btn-primary btn-sm mt-2 save-comment'>Save</button>
+                        </div>
+                    </div>
+                </div>
+            ");
+        }
+        
     }
 }

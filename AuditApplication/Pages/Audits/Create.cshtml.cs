@@ -73,54 +73,71 @@ namespace AuditApplication.Pages.Audits
         private string GenerateAuditHtml(Audit audit)
         {
             var sb = new StringBuilder();
-            sb.Append("<div class=\"container-fluid\">");
+            sb.Append("<div class='container-fluid'>");
             
-            // Title
-            sb.Append("<div class=\"row mb-3\">");
-            sb.Append("<div class=\"col-12\">");
-            sb.AppendFormat("<h3 id=\"auditTitle\">{0}</h3>", audit.AuditName);
-            sb.Append("<a href=\"#\" id=\"editAuditName\">Edit</a>");
-            sb.Append("</div></div>");
+            AppendAuditTitle(sb, audit);
             
             // Create two-columns
             sb.Append("<div class=\"row\">");
             
             // Left column: Section list
-            sb.Append("<div class=\"col-md-4\">");
-            sb.Append("<ul class=\"list-group\" id=\"sectionList\">");
-            foreach (var section in audit.Sections)
+            AppendSectionList(sb, audit.Sections);
+            
+            // Right column: Section display
+            AppendSectionDetails(sb, audit.Sections.FirstOrDefault());
+
+            sb.Append("</div>");
+            sb.Append("</div>");
+            
+            return sb.ToString();
+        }
+
+        private void AppendAuditTitle(StringBuilder sb, Audit audit)
+        {
+            sb.Append(@"
+                <div class='row mb-3'>
+                    <div class='col-12'>
+                        <h3 id='auditTitle'>{0}</h3>
+                        <a href='#' id='editAuditName'>Edit</a>
+                    </div>
+                </div>              
+            ");
+        }
+
+        private void AppendSectionList(StringBuilder sb, IEnumerable<AuditSection> sections)
+        {
+            sb.Append("<div class='col-md-4'>");
+            sb.Append("<ul class='list-group' id='sectionList'>");
+            foreach (var section in sections)
             {
-                sb.AppendFormat("<li class=\"list-group-item\" data-section-id=\"{0}\">{1}</li>", 
+                sb.AppendFormat("<li class='list-group-item' data-section-id='{0}'>{1}</li>", 
                     section.Id, section.Name);
             }
             sb.Append("</ul></div>");
-            
-            // Right column: Section display
-            sb.Append("<div class=\"col-md-8\"><div id=\"sectionDetails\">");
-            var firstSection = audit.Sections.FirstOrDefault();
-            if (firstSection != null)
-            {
-                sb.AppendFormat("<div class=\"section\" data-section-id=\"{0}\">", firstSection.Id);
-                sb.AppendFormat("<h4 class=\"section-name\">{0}</h4>", firstSection.Name);
-                sb.Append("<a href=\"#\" class=\"rename-section\">Rename</a>");
-                sb.Append("<div class=\"questions\">");
+        }
 
-                foreach (var question in firstSection.Questions)
+        private void AppendSectionDetails(StringBuilder sb, AuditSection section)
+        {
+            sb.Append("<div class='col-md-8'><div id='sectionDetails'>");
+            if (section != null)
+            {
+                sb.AppendFormat("<div class='section' data-section-id='{0}'>", section.Id);
+                sb.AppendFormat("<h4 class='section-name'>{0}</h4>", section.Name);
+                sb.Append("<a href='#' class='rename-section'>Rename</a>");
+                sb.Append("<div class='questions'>");
+
+                foreach (var question in section.Questions)
                 {
                     AppendQuestion(sb, question);
                 }
 
                 sb.Append("</div>");
-                sb.Append("<button class=\"btn btn-primary btn-sm mt-3 add-question\">Add Question</button>");
+                sb.Append("<button class='btn btn-primary btn-sm mt-3 add-question'>Add Question</button>");
                 sb.Append("</div>");
             }
-
             sb.Append("</div></div>");
-            sb.Append("</div></div>");
-            
-            return sb.ToString();
         }
-
+        
         private void AppendQuestion(StringBuilder sb, AuditQuestion question)
         {
             sb.AppendFormat("<div class=\"question\" data-question-id=\"{0}\">", question.Id);

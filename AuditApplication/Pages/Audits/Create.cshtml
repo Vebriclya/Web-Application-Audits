@@ -28,11 +28,8 @@
     <script>
         $(document).ready(function () {
             $('#beginAudit').click(function () {
-                console.log("ENTERED BEGINAUDIT");
                 var $dropdown = $('#templateDropdown');
-                console.log("DROPDOWN:", $dropdown.length ? "Found" : "Not found");
-                var templateId = parseInt($dropdown.val(), 10);
-                console.log(`Selected template ID: ${templateId}`);
+                var templateId = parseInt($dropdown.val());
 
                 if (!isNaN(templateId) && templateId > 0){
                     $.ajax({

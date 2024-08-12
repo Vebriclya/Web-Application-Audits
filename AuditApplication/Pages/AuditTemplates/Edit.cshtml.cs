@@ -11,6 +11,7 @@ using AuditApplication.Models;
 
 namespace AuditApplication.Pages.AuditTemplates
 {
+    [IgnoreAntiforgeryToken]
     public class EditModel : PageModel
     {
         private readonly AuditContext _context;
@@ -82,13 +83,16 @@ namespace AuditApplication.Pages.AuditTemplates
 
         public async Task<IActionResult> OnPostUpdateTemplateAsync([FromBody] UpdateTemplateRequest request)
         {
+            Console.WriteLine($"Updating template: Id={request.Id}, Name={request.Name}");
             var template = await _context.AuditTemplates.FindAsync(request.Id);
             if (template == null)
             {
+                Console.WriteLine($"Template not found: Id={request.Id}");
                 return NotFound();
             }
             template.Name = request.Name;
             await _context.SaveChangesAsync();
+            Console.WriteLine($"Template updated successfully: Id={template.Id}");
             return new JsonResult(new { success = true, id = template.Id });
         }
         
@@ -128,6 +132,32 @@ namespace AuditApplication.Pages.AuditTemplates
             public int AuditTemplateId { get; set; }
         }
 
+        public async Task<IActionResult> OnPostUpdateSectionAsync([FromBody] UpdateItemRequest request)
+        {
+            var section = await _context.Sections.FindAsync(request.Id);
+            if (section == null)
+            {
+                return NotFound();
+            }
+
+            section.Name = request.Text;
+            await _context.SaveChangesAsync();
+            return new JsonResult(new { success = true });
+        }
+
+        public async Task<IActionResult> OnPostDeleteSectionAsync([FromBody] int id)
+        {
+            var section = await _context.Sections.FindAsync(id);
+            if (section != null)
+            {
+                _context.Sections.Remove(section);
+                await _context.SaveChangesAsync();
+                return new JsonResult(new { success = true });
+            }
+
+            return NotFound();
+        }
+
         public async Task<IActionResult> OnPostAddQuestionAsync([FromBody] AddQuestionRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text))
@@ -151,6 +181,38 @@ namespace AuditApplication.Pages.AuditTemplates
         {
             public string Text { get; set; }
             public int SectionId { get; set; }
+        }
+
+        public async Task<IActionResult> OnPostUpdateQuestionAsync([FromBody] UpdateItemRequest request)
+        {
+            var question = await _context.Questions.FindAsync(request.Id);
+            if (question == null)
+            {
+                return NotFound();
+            }
+
+            question.Text = request.Text;
+            await _context.SaveChangesAsync();
+            return new JsonResult(new { success = true });
+        }
+
+        public async Task<IActionResult> OnPostDeleteQuestionAsync([FromBody] int id)
+        {
+            var question = await _context.Questions.FindAsync(id);
+            if (question != null)
+            {
+                _context.Questions.Remove(question);
+                await _context.SaveChangesAsync();
+                return new JsonResult(new { success = true });
+            }
+
+            return NotFound();
+        }
+        
+        public class UpdateItemRequest
+        {
+            public int Id { get; set; }
+            public string Text { get; set; }
         }
     }
 }

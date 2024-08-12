@@ -100,7 +100,9 @@
 
             $('#saveTemplate').click(function() {
                 let title = $('#templateTitle').val().trim();
+                console.log(`Attempting to change title to: ${title}`);
                 if (title) {
+                console.log("We have agreed there is a title");
                     $.ajax({
                         url: '?handler=UpdateTemplate',
                         type: 'POST',
@@ -111,6 +113,7 @@
                                 $('input:hidden[name="__RequestVerificationToken"]').val()
                         },
                         success: function(result) {
+                        console.log("This has technically succeeded");
                             if (result.success) {
                                 templateId = result.id;
                                 $('#templateTitleRow').hide();
@@ -120,6 +123,8 @@
                             }
                         },
                         error: function(xhr, status, error) {
+                            console.log(status);
+                            console.log(error);
                             console.error('Error saving template:', xhr.responseText);
                             alert('Failed to save template. Please try again.');
                         }

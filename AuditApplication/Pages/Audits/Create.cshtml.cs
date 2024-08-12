@@ -30,7 +30,6 @@ namespace AuditApplication.Pages.Audits
         [BindProperty]
         public Audit Audit { get; set; } = default!;
 
-        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)

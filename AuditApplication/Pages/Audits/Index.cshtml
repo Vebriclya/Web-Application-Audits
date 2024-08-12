@@ -15,9 +15,6 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Audit[0].Template)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Audit[0].StartDate)
             </th>
             <th>
@@ -29,9 +26,6 @@
     <tbody>
 @foreach (var item in Model.Audit) {
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Template.Id)
-            </td>
             <td>
                 @Html.DisplayFor(modelItem => item.StartDate)
             </td>

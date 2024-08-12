@@ -23,8 +23,7 @@ namespace AuditApplication.Pages.Audits
 
         public async Task OnGetAsync()
         {
-            Audit = await _context.Audits
-                .Include(a => a.Template).ToListAsync();
+
         }
     }
 }

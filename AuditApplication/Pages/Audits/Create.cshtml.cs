@@ -34,21 +34,12 @@ namespace AuditApplication.Pages.Audits
                 Console.WriteLine($"Template ID: {template.Id}, Name: {template.Name}");
             }
         }
-        [HttpPost]
+
         public async Task<IActionResult> OnPostCreateAuditFromTemplateAsync([FromBody] CreateAuditRequest request)
         {
-            Console.WriteLine($"Received request with TemplateId: {request.TemplateId}");
             
             if (!ModelState.IsValid)
             {
-                Console.WriteLine("ModelState is invalid:");
-                foreach (var modelState in ModelState.Values)
-                {
-                    foreach (var error in modelState.Errors)
-                    {
-                        Console.WriteLine(error.ErrorMessage);
-                    }
-                }
                 return BadRequest(ModelState);
             }
             

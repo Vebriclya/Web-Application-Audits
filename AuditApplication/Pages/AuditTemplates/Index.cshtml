@@ -31,9 +31,7 @@
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
                 <td class="d-flex justify-content-end gap-1">
-                    <form method="get" style="display: inline">
-                        <button type="submit" class="btn btn-primary btn-sm" asp-page="./Edit" asp-route-id="@item.Id">View/Edit</button>
-                    </form>
+                    <a href="@Url.Page("./Edit", new { id = item.Id})" class="btn btn-primary btn-sm">View/Edit</a>
                     <button class="btn btn-danger btn-sm delete-template" data-id="@item.Id" data-name="@item.Name">Delete</button>
                 </td>
             </tr>
@@ -43,8 +41,8 @@
 </div>
 </div>
 
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
@@ -74,11 +72,13 @@
                 templateIdToDelete = $(this).data('id');
                 let templateName = $(this).data('name');
                 $('#templateNameToDelete').text(templateName);
-                $('#deleteConfirmModal').modal('show');
+                var deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+                deleteConfirmModal.show();
             });
             
             $('#confirmDelete').click(function () {
                 $.ajax({
+                    url: '?handler=DeleteTemplate',
                     url: '?handler=DeleteTemplate',
                     type: 'POST',
                     data: JSON.stringify(templateIdToDelete),
@@ -99,7 +99,8 @@
                         alert('An error occurred while deleting the template. Please try again.');
                     }
                 });
-                $('#deleteConfirmModal').modal('hide');
+                var deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+                deleteConfirmModal.hide();
             });
         });
         

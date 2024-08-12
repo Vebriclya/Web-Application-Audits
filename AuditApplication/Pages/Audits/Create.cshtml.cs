@@ -17,41 +17,61 @@ namespace AuditApplication.Pages.Audits
         
         public List<AuditTemplate> AvailableTemplates { get;set; }
 
-        public CreateModel(AuditApplication.Data.AuditContext context)
-        {
-            _context = context;
-        }
-
         public async Task OnGetAsync()
         {
             AvailableTemplates = await _context.AuditTemplates.ToListAsync();
         }
-        
-        [BindProperty]
-        public Audit Audit { get; set; } = default!;
 
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostCreateAuditFromTemplateAsync(int templateId)
         {
-            if (!ModelState.IsValid)
+            var template = await _context.AuditTemplates
+                .Include(t => t.Sections)
+                .ThenInclude(s => s.Questions)
+                .FirstOrDefaultAsync(t => t.Id == templateId);
+
+            if (template == null)
             {
-                return Page();
+                return new JsonResult(new { success = false });
             }
 
-            try
+            var audit = new Audit
             {
-                _context.Audits.Add(Audit);
-                await _context.SaveChangesAsync();
+                AuditName = $"{template.Name} - Audit",
+                StartDate = DateTime.Now
+            };
 
-                return RedirectToPage("./Index");
-            }
-            catch (Exception ex)
+            foreach (var templateSection in template.Sections)
             {
-                ModelState.AddModelError(string.Empty, "An error occurred while saving the audit template, please try again.");
-                return Page();
-            }
-            
+                var auditSection = new AuditSection
+                {
+                    Name = templateSection.Name,
+                    Order = templateSection.Order
+                };
 
-            
+                foreach (var templateQuestion in templateSection.Questions)
+                {
+                    var auditQuestion = new AuditQuestion
+                    {
+                        Text = templateQuestion.Text,
+                        Order = templateQuestion.Order
+                    };
+                    auditSection.Questions.Add(auditQuestion);
+                }
+                audit.Sections.Add(auditSection);
+            }
+
+            _context.Audits.Add(audit);
+            await _context.SaveChangesAsync();
+
+            var auditHtml = GenerateAuditHtml(audit);
+
+            return new JsonResult(new { success = true, auditHtml = auditHtml });
         }
+
+        private string GenerateAuditHtml(Audit audit)
+        {
+            return "placeholder";
+        }
+
     }
 }

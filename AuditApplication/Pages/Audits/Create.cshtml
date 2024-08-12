@@ -31,7 +31,7 @@
                 var $dropdown = $('#templateDropdown');
                 var templateId = parseInt($dropdown.val());
 
-                if (!isNaN(templateId) && templateId > 0){
+                if (templateId){
                     $.ajax({
                         url: '?handler=CreateAuditFromTemplate',
                         type: 'POST',

@@ -13,6 +13,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace AuditApplication.Pages.Audits
 {
+    [ValidateAntiForgeryToken]
     public class CreateModel : PageModel
     {
         private readonly AuditContext _context;
@@ -27,18 +28,38 @@ namespace AuditApplication.Pages.Audits
         public async Task OnGetAsync()
         {
             AvailableTemplates = await _context.AuditTemplates.ToListAsync();
+            Console.WriteLine($"Number of templates loaded: {AvailableTemplates.Count}");
+            foreach (var template in AvailableTemplates)
+            {
+                Console.WriteLine($"Template ID: {template.Id}, Name: {template.Name}");
+            }
         }
-
-        public async Task<IActionResult> OnPostCreateAuditFromTemplateAsync(int templateId)
+        [HttpPost]
+        public async Task<IActionResult> OnPostCreateAuditFromTemplateAsync([FromBody] CreateAuditRequest request)
         {
+            Console.WriteLine($"Received request with TemplateId: {request.TemplateId}");
+            
+            if (!ModelState.IsValid)
+            {
+                Console.WriteLine("ModelState is invalid:");
+                foreach (var modelState in ModelState.Values)
+                {
+                    foreach (var error in modelState.Errors)
+                    {
+                        Console.WriteLine(error.ErrorMessage);
+                    }
+                }
+                return BadRequest(ModelState);
+            }
+            
             var template = await _context.AuditTemplates
                 .Include(t => t.Sections)
                 .ThenInclude(s => s.Questions)
-                .FirstOrDefaultAsync(t => t.Id == templateId);
+                .FirstOrDefaultAsync(t => t.Id == request.TemplateId);
 
             if (template == null)
             {
-                return new JsonResult(new { success = false });
+                return new JsonResult(new { success = false, message = "Template not found" });
             }
 
             var audit = new Audit
@@ -73,6 +94,11 @@ namespace AuditApplication.Pages.Audits
             var auditHtml = GenerateAuditHtml(audit);
 
             return new JsonResult(new { success = true, auditHtml = auditHtml });
+        }
+
+        public class CreateAuditRequest
+        {
+            public int TemplateId { get; set; }
         }
 
         private string GenerateAuditHtml(Audit audit)

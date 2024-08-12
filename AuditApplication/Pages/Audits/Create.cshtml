@@ -21,37 +21,46 @@
     <a asp-page="Index">Back to List</a>
 </div>
 
+@Html.AntiForgeryToken()
 @section Scripts
 {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
-            
             $('#beginAudit').click(function () {
-                var templateId = $('templateDropdown').val();
-                if (templateId){
+                console.log("ENTERED BEGINAUDIT");
+                var $dropdown = $('#templateDropdown');
+                console.log("DROPDOWN:", $dropdown.length ? "Found" : "Not found");
+                var templateId = parseInt($dropdown.val(), 10);
+                console.log(`Selected template ID: ${templateId}`);
+
+                if (!isNaN(templateId) && templateId > 0){
                     $.ajax({
                         url: '?handler=CreateAuditFromTemplate',
                         type: 'POST',
-                        data: { templateId: templateId },
+                        data: JSON.stringify({ templateId: templateId }),
+                        contentType: 'application/json',
+                        dataType: 'json',
                         headers: {
                             "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
                         },
                         success: function (result){
                             if (result.success){
                                 $('#templateSelection').hide();
-                                $('auditContent').html(result.auditHtml).show();
+                                $('#auditContent').html(result.auditHtml).show();
                             } else {
-                                alert('Failed to create audit, please try again.');
+                                alert('Failed to create audit: ' + (result.message || "Please try again."));
                             }
                         },
-                        error: function () {
+                        error: function (xhr, status, error) {
+                            console.error("Error", xhr.responseText);
                             alert('An error occurred. Please try again.');
                         }
                     });
                 } else {
                     alert('Please select a template.');
                 }
-            });
+});
         });
     </script>
 }

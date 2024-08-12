@@ -19,11 +19,24 @@ namespace AuditApplication.Pages.Audits
             _context = context;
         }
 
-        public IList<Audit> Audit { get;set; } = default!;
+        public IList<Audit> Audits { get;set; } = default!;
+        [BindProperty(SupportsGet = true)]
+        public string? FilterOption { get; set; }
 
         public async Task OnGetAsync()
         {
+            IQueryable<Audit> auditsQuery = _context.Audits;
 
+            if (FilterOption == "Completed")
+            {
+                auditsQuery = auditsQuery.Where(a => a.CompletionDate != null);
+            }
+            else if (FilterOption == "Uncompleted")
+            {
+                auditsQuery = auditsQuery.Where(a => a.CompletionDate == null);
+            }
+
+            Audits = await auditsQuery.ToListAsync();
         }
     }
 }

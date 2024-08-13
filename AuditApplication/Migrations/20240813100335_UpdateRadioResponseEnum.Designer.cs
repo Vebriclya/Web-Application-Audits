@@ -3,6 +3,7 @@ using System;
 using AuditApplication.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuditApplication.Migrations
 {
     [DbContext(typeof(AuditContext))]
-    partial class AuditContextModelSnapshot : ModelSnapshot
+    [Migration("20240813100335_UpdateRadioResponseEnum")]
+    partial class UpdateRadioResponseEnum
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0-preview.6.24327.4");
@@ -130,6 +133,7 @@ namespace AuditApplication.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("AttachmentPath")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("AuditId")
@@ -142,6 +146,7 @@ namespace AuditApplication.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("TextAnswer")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -213,7 +218,7 @@ namespace AuditApplication.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AuditApplication.Models.AuditQuestion", "Question")
+                    b.HasOne("AuditApplication.Models.Question", "Question")
                         .WithMany()
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)

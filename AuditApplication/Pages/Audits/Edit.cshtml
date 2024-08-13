@@ -36,16 +36,16 @@
     <script>
     $(document).ready(function () {
         var auditData = @Json.Serialize(new
-            {
-                id = Model.Audit.Id,
-                name = Model.Audit.AuditName,
-                sections = Model.Audit.Sections.Select(s => new
-                {
-                    id = s.Id,
-                    name = s.Name,
-                    order = s.Order
-                })
-            });
+                        {
+                            id = Model.Audit.Id,
+                            name = Model.Audit.AuditName,
+                            sections = Model.Audit.Sections.Select(s => new
+                            {
+                                id = s.Id,
+                                name = s.Name,
+                                order = s.Order
+                            })
+                        });
             
         var sectionListHtml = generateSectionListHtml(@Html.Raw(Json.Serialize(Model.Audit.Sections.Select(s => new { s.Id, s.Name, s.Order }))));
         $('#sectionList').html(sectionListHtml);
@@ -68,53 +68,57 @@
         });
 
         function saveQuestionResponse(questionId, response) {
+            var auditId = @Model.Audit.Id;
+            var scoreValue = {
+                'Excellent': 100,
+                'Good': 75,
+                'RequiresImprovement': 50,
+                'Poor': 25,
+                'NotAssessed': 0
+            }[response];
+
+            var requestData = {
+                questionId: questionId,
+                auditId: auditId,
+                response: scoreValue
+            };
+            
+            var textAnswerInput = $(`#textAnswer-${questionId}`);
+            if (textAnswerInput.length && textAnswerInput.val() !== "") {
+                requestData.textAnswer = textAnswerInput.val();
+            }
+
+            console.log('Saving response:', requestData);
+
             $.ajax({
                 url: '?handler=UpdateQuestionResponse',
                 type: 'POST',
-                data: JSON.stringify({ questionId: questionId, auditId: @Model.Audit.Id, response: response }),
+                data: JSON.stringify(requestData),
                 contentType: 'application/json',
                 headers: {
                     "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
                 },
                 success: function(result) {
+                    console.log('Success response:', result);
                     if (result.success) {
                         console.log('Response saved successfully');
+                        $(`input[name='response-${questionId}'][value='${response}']`).prop('checked', true);
                     } else {
                         console.error('Failed to save response:', result.message);
+                        alert('Failed to save response: ' + result.message);
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error saving response:', error);
-                }
-            });
-        }
-        
-        
-        // Changing comments on questions
-        $(document).on('click', '.save-comment', function() {
-            var questionId = $(this).closest('.question').data('question-id');
-            var comment = $(this).siblings('.comment-text').val();
-            saveQuestionComment(questionId, comment);
-        });
-        
-        function saveQuestionComment(questionId, comment) {
-            $.ajax({
-                url: '?handler=UpdateQuestionComment',
-                type: 'POST',
-                data: JSON.stringify({ questionId: questionId, auditId: @Model.Audit.Id, comment: comment }),
-                contentType: 'application/json',
-                headers: {
-                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(result) {
-                    if (result.success) {
-                        console.log('Comment saved successfully');
-                    } else {
-                        console.error('Failed to save comment:', result.message);
+                    console.log('Error status:', status);
+                    console.log('Error thrown:', error);
+                    console.log('Response text:', xhr.responseText);
+                    try {
+                        var jsonResponse = JSON.parse(xhr.responseText);
+                        console.log('Parsed error response:', jsonResponse);
+                    } catch (e) {
+                        console.log('Could not parse error response as JSON');
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error saving comment:', error);
+                    alert('Failed to save response. Please check the console for more details.');
                 }
             });
         }
@@ -148,6 +152,7 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Error updating section:', error);
+                    alert('Error updating section, see dev console');
                 }
             });
         }
@@ -180,9 +185,45 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Error updating question:', error);
+                    alert('Error updating question, see dev console');
                 }
             });
         }
+
+        $(document).on('click', '.delete-question', function(e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to delete this question?')) {
+                var questionId = $(this).closest('.question').data('question-id');
+                deleteQuestion(questionId);
+            }
+        });
+
+        function deleteQuestion(questionId) {
+            $.ajax({
+                url: '?handler=DeleteQuestion',
+                type: 'POST',
+                data: JSON.stringify(questionId),
+                contentType: 'application/json',
+                headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(result) {
+                    if (result.success) {
+                        $(`[data-question-id="${questionId}"]`).remove();
+                        console.log('Question deleted successfully');
+                    } else {
+                        console.error('Failed to delete question');
+                        alert('Failed to delete question. Please try again.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error deleting question:', error);
+                    alert('Error deleting question, see dev console');
+                }
+            });
+        }
+        
+        
         
         // Section List stuff (left hand side)
         function generateSectionListHtml(sections) {
@@ -206,16 +247,32 @@
                 success: function (result) {
                     if (result.sectionDetailsHtml) {
                         $('#sectionDetails').html(result.sectionDetailsHtml);
+                        applyQuestionHandlers();
                     } else {
                         console.error("No sectionDetailsHtml in result");
                     }
                 },
                 error: function (xhr, status, error) {
                     console.error("Error loading section details:", error);
-                    alert('Failed to load section details. Please try again.');
+                    alert("Error loading section details, see dev console.");
                 }
             });
         });
+        
+        function applyQuestionHandlers() {
+            $('.response-options input[type="radio"]').off('change').on('change', function() {
+                var questionId = $(this).closest('.question').data('question-id');
+                var response = $(this).val();
+                saveQuestionResponse(questionId, response);
+            });
+
+            $('.save-comment').on('click', function() {
+                var questionId = $(this).closest('.question').data('question-id');
+                var comment = $(this).siblings('.comment-text').val();
+                saveQuestionComment(questionId, comment);
+            });
+        }
+        
         
         // Section Detail Stuff (right hand side)
         function generateSectionDetailsHtml(section) {
@@ -257,21 +314,15 @@
             options.forEach(function(option) {
                 var displayText = option === 'RequiresImprovement' ? 'Requires Improvement' :
                     option === 'NotAssessed' ? 'Not Assessed' : option;
+                var checked = question.response === option ? 'checked' : '';
                 html += `<div class='form-check form-check-inline'>
                 <input class='form-check-input' type='radio' name='response-${question.id}' 
-                    id='response-${question.id}-${option}' value='${option}'>
+                    id='response-${question.id}-${option}' value='${option}' ${checked}>
                 <label class='form-check-label' for='response-${question.id}-${option}'>${displayText}</label>
             </div>`;
             });
             html += `</div>`;
             return html;
-        }
-
-        function generateAttachmentAndCommentButtons() {
-            return `<div class='mt-2 d-flex justify-content-end'>
-                            <button class='btn btn-secondary btn-sm attachments-btn me-2'>Attachments</button>
-                            <button class='btn btn-secondary btn-sm comments-btn'>Comments</button>
-                        </div>`;
         }
 
         function generateCommentsAccordion() {
@@ -284,6 +335,52 @@
                             </div>
                         </div>`;
         }
+
+        function generateAttachmentAndCommentButtons() {
+            return `<div class='mt-2 d-flex justify-content-end'>
+                            <button class='btn btn-secondary btn-sm attachments-btn me-2'>Attachments</button>
+                            <button class='btn btn-secondary btn-sm comments-btn'>Comments</button>
+                        </div>`;
+        }
+
+        $(document).on('click', '.comments-btn', function() {
+            $(this).closest('.question').find('.comments-accordion').toggle();
+        });
+
+        $(document).on('click', '.attachments-btn', function() {
+            alert('Attachment functionality coming soon!');
+        });
+
+        $(document).ready(function() {
+            // Fetch saved responses and update UI
+            $.ajax({
+                url: '?handler=SavedResponses',
+                type: 'GET',
+                success: function(result) {
+                    if (result.success) {
+                        result.responses.forEach(function(response) {
+                            var radioValue;
+                            switch(response.radioAnswer) {
+                                case 100: radioValue = 'Excellent'; break;
+                                case 75: radioValue = 'Good'; break;
+                                case 50: radioValue = 'RequiresImprovement'; break;
+                                case 25: radioValue = 'Poor'; break;
+                                case 0: radioValue = 'NotAssessed'; break;
+                            }
+                            $(`input[name='response-${response.questionId}'][value='${radioValue}']`).prop('checked', true);
+
+                            // If you have text inputs for answers, update those too
+                            if (response.textAnswer) {
+                                $(`#textAnswer-${response.questionId}`).val(response.textAnswer);
+                            }
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading saved responses:', error);
+                }
+            });
+        });
     });
 </script>
 }

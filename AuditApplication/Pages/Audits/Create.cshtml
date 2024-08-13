@@ -6,13 +6,12 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<div id="templateSelection">
-    <select id="templateDropdown" asp-items="@(new SelectList(Model.AvailableTemplates, "Id", "Name"))">
-        <option>Select an audit template</option>
-    </select>
-    <button id="beginAudit" class="btn btn-primary">Begin</button>
-</div>
-
+    <div id="templateSelection">
+        <select id="templateDropdown" asp-items="@(new SelectList(Model.AvailableTemplates, "Id", "Name"))">
+            <option>Select an audit template</option>
+        </select>
+        <button id="beginAudit" class="btn btn-primary">Begin</button>
+    </div>
 <div id="auditContent" style="display: none">
     
 </div>

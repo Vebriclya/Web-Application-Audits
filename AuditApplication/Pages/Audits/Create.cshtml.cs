@@ -94,93 +94,100 @@ namespace AuditApplication.Pages.Audits
 
         private string GenerateAuditHtml(Audit audit)
         {
-            var sb = new StringBuilder();
-            sb.Append("<div class='container-fluid'>");
-            
-            AppendAuditTitle(sb, audit);
-            
-            // Create two-columns
-            sb.Append("<div class='row'>");
-            sb.Append("<div class='col-md-4 vh-100'>");
-            
-            // Left column: Section list
-            AppendSectionList(sb, audit.Sections);
-            sb.Append("</div>");
-            sb.Append("<div class='col-md-8 vh-100'>");
-            
-            // Right column: Section display
-            AppendSectionDetails(sb, audit.Sections.FirstOrDefault());
-            sb.Append("</div>");
-            sb.Append("</div>");
-            
-            return sb.ToString();
+                var sb = new StringBuilder();
+    
+                // Audit Title 
+                AppendAuditTitle(sb, audit);
+    
+                // Main content row
+                sb.Append("<div class='row g-0'>");
+    
+                // Left sidebar
+                sb.Append("<div class='col-3 left-sidebar'>");
+                AppendSectionList(sb, audit.Sections);
+                sb.Append("</div>");
+    
+                // Right content
+                sb.Append("<div class='col-9 right-content'>");
+                AppendSectionDetails(sb, audit.Sections.FirstOrDefault());
+                sb.Append("</div>");
+    
+                sb.Append("</div>");
+    
+                return sb.ToString();
         }
 
         private void AppendAuditTitle(StringBuilder sb, Audit audit)
         {
             sb.AppendFormat(@"
-                <div class='row mb-3'>
+                <div class='row header-area m-0'>
                     <div class='col-12 d-flex justify-content-between align-items-center'>
-                        <h3 id='auditTitle'>{0}</h3>
-                        <a href='#' id='editAuditName'>Edit</a>
+                        <div class='col-2'></div>
+                        <h3 id='auditTitle' class='col-8 text-center m-0'>{0}</h3>
+                        <div class='col-2 text-end'>
+                            <a href='#' id='editAuditName'>Edit</a>
+                        </div>
                     </div>
-                </div>              
+                </div>
             ", audit.AuditName);
         }
 
         private void AppendSectionList(StringBuilder sb, IEnumerable<AuditSection> sections)
         {
-            sb.Append("<div class='col-md-4'>");
             sb.Append("<ul class='list-group' id='sectionList'>");
             foreach (var section in sections)
             {
                 sb.AppendFormat("<li class='list-group-item' data-section-id='{0}'>{1}</li>", 
                     section.Id, section.Name);
             }
-            sb.Append("</ul></div>");
+            sb.Append("</ul>");
         }
 
         private void AppendSectionDetails(StringBuilder sb, AuditSection section)
         {
-            sb.Append("<div class='col-md-8'><div id='sectionDetails'>");
+            sb.Append("<div id='sectionDetails' class='p-3'>");
             if (section != null)
             {
                 sb.AppendFormat("<div class='section' data-section-id='{0}'>", section.Id);
-                sb.Append("<div class='d-flex justify-content-between align-items-center'>");
+                sb.Append("<div class='text-center mb-4'>");
                 sb.AppendFormat("<h4 class='section-name'>{0}</h4>", section.Name);
-                sb.Append("<a href='#' class='edit-section'>Edit</a>");
                 sb.Append("</div>");
                 sb.Append("<div class='questions'>");
 
+                int questionNumber = 1;
                 foreach (var question in section.Questions)
                 {
-                    AppendQuestion(sb, question);
+                    AppendQuestion(sb, question, questionNumber++);
                 }
 
                 sb.Append("</div>");
-                sb.Append("<button class='btn btn-primary btn-sm mt-3 add-question'>Add Question</button>");
+                sb.Append("<div class='text-end mt-3'>");
+                sb.Append("<button class='btn btn-primary btn-sm add-question-btn'>Add Question</button>");
+                sb.Append("</div>");
                 sb.Append("</div>");
             }
             sb.Append("</div>");
         }
         
-        private void AppendQuestion(StringBuilder sb, AuditQuestion question)
+        private void AppendQuestion(StringBuilder sb, AuditQuestion question, int questionNumber)
         {
-            sb.AppendFormat("<div class=\"question\" data-question-id=\"{0}\">", question.Id);
+            sb.AppendFormat("<div class='question mb-3 pb-3 border-bottom' data-question-id='{0}'>", question.Id);
+            
             sb.Append("<div class='d-flex justify-content-between align-items-center'>");
-            sb.AppendFormat("<p class=\"question-text mb-0\">{0}</p>", question.Text);
+            sb.AppendFormat("<h5 class='question-text mb-0'>{0}</h5>", question.Text);
             sb.Append("<div>");
-            sb.Append("<a href=\"#\" class=\"edit-question me-2\">Edit</a>");
-            sb.Append("<a href=\"#\" class=\"delete-question\">Delete</a>");
+            sb.Append("<a href='#' class='edit-question me-2'>Edit</a>");
+            sb.Append("<a href='#' class='delete-question'>Delete</a>");
             sb.Append("</div>");
             sb.Append("</div>");
-            
-            //Radio Buttons
+
+    
+            // Radio Buttons
             AppendRadioButtons(sb, question);
-            
+    
             // Attachment and Comments buttons
             AppendAttachmentAndCommentButtons(sb);
-            
+    
             // Comments accordion
             AppendCommentsAccordion(sb);
 

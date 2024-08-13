@@ -172,5 +172,13 @@ body {
 }
 
 #sectionList li {
+  cursor: default;
+}
+
+#sectionList li .section-text {
   cursor: pointer;
+}
+
+#sectionList li .section-text:hover {
+  text-decoration: underline;
 }

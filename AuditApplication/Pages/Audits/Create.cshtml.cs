@@ -102,7 +102,7 @@ namespace AuditApplication.Pages.Audits
             var sb = new StringBuilder();
             foreach (var section in sections)
             {
-                sb.AppendFormat("<li class='list-group-item' data-section-id='{0}'>{1}</li>", 
+                sb.AppendFormat("<li class='list-group-item' data-section-id='{0}'><span class='section-text'>{1}</span></li>", 
                     section.Id, section.Name);
             }
             return sb.ToString();

@@ -116,14 +116,14 @@ namespace AuditApplication.Pages.Audits
 
         private void AppendAuditTitle(StringBuilder sb, Audit audit)
         {
-            sb.Append(@"
+            sb.AppendFormat(@"
                 <div class='row mb-3'>
-                    <div class='col-12'>
+                    <div class='col-12 d-flex justify-content-between align-items-center'>
                         <h3 id='auditTitle'>{0}</h3>
                         <a href='#' id='editAuditName'>Edit</a>
                     </div>
                 </div>              
-            ");
+            ", audit.AuditName);
         }
 
         private void AppendSectionList(StringBuilder sb, IEnumerable<AuditSection> sections)

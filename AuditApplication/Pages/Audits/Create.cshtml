@@ -81,7 +81,32 @@
                     console.log("No template selected");
                     alert('Please select a template.');
                 }
-});
+        });
+        
+            $(document).on('click', '#sectionList li', function () {
+                var sectionId = $(this).data('section-id');
+                
+                $('#sectionList li').removeClass('active');
+                $(this).addClass('active');
+                
+                $.ajax({
+                    url: '?handler=SectionDetails',
+                    type: 'GET',
+                    data: { sectionId: sectionId },
+                    success: function (result){
+                        console.log("Received result:", result);
+                        if (result.sectionDetailsHtml){
+                            $('#sectionDetails').html(result.sectionDetailsHtml);    
+                        } else {
+                            console.error("No sectionDetailsHtml in result");
+                        }
+                    },
+                    error: function (xhr, status, error){
+                        console.error("Error loading section details:", error);
+                        alert('Failed to load section details. Please try again.');
+                    }
+                });
+            });
         });
     </script>
 }

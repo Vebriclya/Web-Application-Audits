@@ -208,6 +208,23 @@ namespace AuditApplication.Pages.Audits
                 </div>
             ");
         }
+
+        public IActionResult OnGetSectionDetails(int sectionId)
+        {
+            var section = _context.AuditSections
+                .Include(s => s.Questions)
+                .FirstOrDefault(s => s.Id == sectionId);
+
+            if (section == null)
+            {
+                return NotFound();
+            }
+
+            return new JsonResult(new
+            {
+                sectionDetailsHtml = GenerateSectionDetailsHtml(section)
+            });
+        }
         
     }
 }

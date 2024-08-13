@@ -122,8 +122,11 @@ namespace AuditApplication.Pages.Audits
             sb.AppendFormat(@"
                 <div class='row header-area m-0'>
                     <div class='col-12 d-flex justify-content-between align-items-center'>
+                        <div class='col-2 text-start'>
+                            <a href='/Audits/Index'><-- Back to List</a>
+                        </div>
                         <div class='col-2'></div>
-                        <h3 id='auditTitle' class='col-8 text-center m-0'>{0}</h3>
+                        <h3 id='auditTitle' class='col-6 text-center m-0'>{0}</h3>
                         <div class='col-2 text-end'>
                             <a href='#' id='editAuditName'>Edit</a>
                         </div>

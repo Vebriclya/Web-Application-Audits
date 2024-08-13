@@ -184,13 +184,23 @@ namespace AuditApplication.Pages.Audits
             sb.Append("<div class='response-options'>");
             foreach (var option in Enum.GetValues(typeof(RadioResponse)))
             {
+                string displayText = option.ToString();
+                if (displayText == "RequiresImprovement")
+                {
+                    displayText = "Requires Improvement";
+                } 
+                else if (displayText == "NotAssessed")
+                {
+                    displayText = "Not Assessed";   
+                }
+                
                 sb.AppendFormat(@"
                     <div class='form-check form-check-inline'>
                         <input class='form-check-input' type='radio' name='response-{0}' 
                             id='response-{0}-{1}' value='{1}'>
-                        <label class='form-check-label' for='response-{0}-{1}'>{1}</label>
+                        <label class='form-check-label' for='response-{0}-{1}'>{2}</label>
                     </div>
-                ", question.Id, option);
+                ", question.Id, option, displayText);
             }
             sb.Append("</div>");
         }

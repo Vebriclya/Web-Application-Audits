@@ -158,3 +158,15 @@ body {
 .response-options{
   text-align: center;
 }
+
+.navbar {
+  border-bottom: 1px solid black;
+}
+
+.navbar-brand {
+  font-weight: bold;
+}
+
+.nav-link:hover {
+  color: white !important;
+}

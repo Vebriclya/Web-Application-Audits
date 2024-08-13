@@ -2,22 +2,37 @@
 @model AuditApplication.Pages.Audits.CreateModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create New Audit";
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
-
-    <div id="templateSelection">
-        <select id="templateDropdown" asp-items="@(new SelectList(Model.AvailableTemplates, "Id", "Name"))">
-            <option>Select an audit template</option>
-        </select>
-        <button id="beginAudit" class="btn btn-primary">Begin</button>
+<div class="row header-area m-0">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div class="col-2 text-start">
+            <a asp-page="Index">&lt;--Back to List</a>
+        </div>
+        <div class="col-2"></div>
+        <h3 id="auditTitle" class="col-6 text-center m-0">New Audit</h3>
+        <div class="col-2 text-end"></div>
     </div>
-<div id="auditContent" style="display: none">
-    
 </div>
 
-<div>
-    <a asp-page="Index">Back to List</a>
+<div class="row g-0">
+    <div class="col-3 left-sidebar">
+        <ul class="list-group" id="sectionList">
+            <!-- Do not fret, population lies here -->
+        </ul>
+    </div>
+    <div class="col-9 right-content">
+        <div id="templateSelection" class="d-flex justify-content-start align-items-center mt-4 ms-4">
+                <select id="templateDropdown" class="form-select me-3" style="width: 300px;" asp-items="@(new SelectList(Model.AvailableTemplates, "Id", "Name"))">
+                    <option>Select an audit template to begin</option>
+                </select>
+                <button id="beginAudit" class="btn btn-primary">Begin</button>
+        </div>
+        <div id="sectionDetails" class="mt-4" style="display: none;">
+            <!-- I, too, shall be populated -->
+        </div>
+    </div>
 </div>
 
 @Html.AntiForgeryToken()
@@ -26,10 +41,15 @@
     <script>
         $(document).ready(function () {
             $('#beginAudit').click(function () {
+                console.log("BEGIN button clicked");
                 var $dropdown = $('#templateDropdown');
                 var templateId = parseInt($dropdown.val());
 
                 if (templateId){
+                    console.log("Template selected:", templateId);
+                    console.log("templateSelection element:", $('#templateSelection').length);
+                    console.log("Hiding templateSelection");
+                    document.getElementById('templateSelection').style.cssText = 'display: none !important;';
                     $.ajax({
                         url: '?handler=CreateAuditFromTemplate',
                         type: 'POST',
@@ -40,19 +60,25 @@
                             "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
                         },
                         success: function (result){
+                            console.log("Ajax call successful");
                             if (result.success){
-                                $('#templateSelection').hide();
-                                $('#auditContent').html(result.auditHtml).show();
+                                console.log("Updating UI elements");
+                                $('#sectionList').html(result.sectionListHtml);
+                                $('#sectionDetails').html(result.sectionDetailsHtml).show();
+                                $('#auditTitle').text(result.auditName).show();
                             } else {
+                                console.error("Failed to create audit:", result.message);
                                 alert('Failed to create audit: ' + (result.message || "Please try again."));
                             }
                         },
                         error: function (xhr, status, error) {
+                            console.error("Ajax error:", error);
                             console.error("Error", xhr.responseText);
                             alert('An error occurred. Please try again.');
                         }
                     });
                 } else {
+                    console.log("No template selected");
                     alert('Please select a template.');
                 }
 });

@@ -37,12 +37,11 @@ namespace AuditApplication.Pages.Audits
 
         public async Task<IActionResult> OnPostCreateAuditFromTemplateAsync([FromBody] CreateAuditRequest request)
         {
-            
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            
+    
             var template = await _context.AuditTemplates
                 .Include(t => t.Sections)
                 .ThenInclude(s => s.Questions)
@@ -82,73 +81,36 @@ namespace AuditApplication.Pages.Audits
             _context.Audits.Add(audit);
             await _context.SaveChangesAsync();
 
-            var auditHtml = GenerateAuditHtml(audit);
+            var sectionListHtml = GenerateSectionListHtml(audit.Sections);
+            var sectionDetailsHtml = GenerateSectionDetailsHtml(audit.Sections.FirstOrDefault());
 
-            return new JsonResult(new { success = true, auditHtml = auditHtml });
+            return new JsonResult(new { 
+                success = true, 
+                auditName = audit.AuditName,
+                sectionListHtml = sectionListHtml, 
+                sectionDetailsHtml = sectionDetailsHtml 
+            });
         }
 
         public class CreateAuditRequest
         {
             public int TemplateId { get; set; }
         }
-
-        private string GenerateAuditHtml(Audit audit)
+        
+        private string GenerateSectionListHtml(IEnumerable<AuditSection> sections)
         {
-                var sb = new StringBuilder();
-    
-                // Audit Title 
-                AppendAuditTitle(sb, audit);
-    
-                // Main content row
-                sb.Append("<div class='row g-0'>");
-    
-                // Left sidebar
-                sb.Append("<div class='col-3 left-sidebar'>");
-                AppendSectionList(sb, audit.Sections);
-                sb.Append("</div>");
-    
-                // Right content
-                sb.Append("<div class='col-9 right-content'>");
-                AppendSectionDetails(sb, audit.Sections.FirstOrDefault());
-                sb.Append("</div>");
-    
-                sb.Append("</div>");
-    
-                return sb.ToString();
-        }
-
-        private void AppendAuditTitle(StringBuilder sb, Audit audit)
-        {
-            sb.AppendFormat(@"
-                <div class='row header-area m-0'>
-                    <div class='col-12 d-flex justify-content-between align-items-center'>
-                        <div class='col-2 text-start'>
-                            <a href='/Audits/Index'><-- Back to List</a>
-                        </div>
-                        <div class='col-2'></div>
-                        <h3 id='auditTitle' class='col-6 text-center m-0'>{0}</h3>
-                        <div class='col-2 text-end'>
-                            <a href='#' id='editAuditName'>Edit</a>
-                        </div>
-                    </div>
-                </div>
-            ", audit.AuditName);
-        }
-
-        private void AppendSectionList(StringBuilder sb, IEnumerable<AuditSection> sections)
-        {
-            sb.Append("<ul class='list-group' id='sectionList'>");
+            var sb = new StringBuilder();
             foreach (var section in sections)
             {
                 sb.AppendFormat("<li class='list-group-item' data-section-id='{0}'>{1}</li>", 
                     section.Id, section.Name);
             }
-            sb.Append("</ul>");
+            return sb.ToString();
         }
 
-        private void AppendSectionDetails(StringBuilder sb, AuditSection section)
+        private string GenerateSectionDetailsHtml(AuditSection section)
         {
-            sb.Append("<div id='sectionDetails' class='p-3'>");
+            var sb = new StringBuilder();
             if (section != null)
             {
                 sb.AppendFormat("<div class='section' data-section-id='{0}'>", section.Id);
@@ -169,7 +131,7 @@ namespace AuditApplication.Pages.Audits
                 sb.Append("</div>");
                 sb.Append("</div>");
             }
-            sb.Append("</div>");
+            return sb.ToString();
         }
         
         private void AppendQuestion(StringBuilder sb, AuditQuestion question, int questionNumber)

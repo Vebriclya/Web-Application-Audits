@@ -383,6 +383,12 @@
             alert('Please select a template to load');
         }
     });
+
+        $(document).on('click', '.cancel-section-edit, .cancel-question-edit', function(){
+            let type = $(this).hasClass('cancel-section-edit') ? 'section' : 'question';
+            $(`.edit-${type}-form`).prev().show();
+            $(`.edit-${type}-form`).remove();
+        });
     });
     </script>
 }

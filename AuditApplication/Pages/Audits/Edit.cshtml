@@ -6,33 +6,284 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<h1>Edit</h1>
-
-<h4>Audit</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Audit.Id" />
-            <div class="form-group">
-                <label asp-for="Audit.StartDate" class="control-label"></label>
-                <input asp-for="Audit.StartDate" class="form-control" />
-                <span asp-validation-for="Audit.StartDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Audit.CompletionDate" class="control-label"></label>
-                <input asp-for="Audit.CompletionDate" class="form-control" />
-                <span asp-validation-for="Audit.CompletionDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="row header-area m-0">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div class="col-2 text-start">
+            <a asp-page="Index">&lt;--Back to List</a>
+        </div>
+        <div class="col-2"></div>
+        <h3 id="auditTitle" class="col-6 text-center m-0">New Audit</h3>
+        <div class="col-2 text-end"></div>
     </div>
 </div>
 
-<div>
-    <a asp-page="./Index">Back to List</a>
+<div class="row g-0">
+    <div class="col-3 left-sidebar">
+        <ul class="list-group" id="sectionList">
+            <!-- Do not fret, population lies here -->
+        </ul>
+    </div>
+    <div class="col-9 right-content">
+        <div id="sectionDetails" class="mt-4" style="display: none;">
+            <!-- I, too, shall be populated -->
+        </div>
+    </div>
 </div>
 
+@Html.AntiForgeryToken()
+@section Scripts
+{
+    <script>
+    $(document).ready(function () {
+        var auditData = @Json.Serialize(new
+            {
+                id = Model.Audit.Id,
+                name = Model.Audit.AuditName,
+                sections = Model.Audit.Sections.Select(s => new
+                {
+                    id = s.Id,
+                    name = s.Name,
+                    order = s.Order
+                })
+            });
+            
+        var sectionListHtml = generateSectionListHtml(@Html.Raw(Json.Serialize(Model.Audit.Sections.Select(s => new { s.Id, s.Name, s.Order }))));
+        $('#sectionList').html(sectionListHtml);
+
+        $('#auditTitle').text('@Model.Audit.AuditName').show();
+        
+        // you might not want these two bits
+        var firstSection = @Json.Serialize(Model.Audit.Sections.FirstOrDefault());
+        if (firstSection){
+            var sectionDetailsHtml = generateSectionDetailsHtml(firstSection);
+            $('#sectionDetails').html(sectionDetailsHtml).show();
+        }
+        
+        
+        // Changing responses (think radio)
+        $(document).on('change', '.response-options input[type="radio"]', function() {
+            var questionId = $(this).closest('.question').data('question-id');
+            var response = $(this).val();
+            saveQuestionResponse(questionId, response);
+        });
+
+        function saveQuestionResponse(questionId, response) {
+            $.ajax({
+                url: '?handler=UpdateQuestionResponse',
+                type: 'POST',
+                data: JSON.stringify({ questionId: questionId, auditId: @Model.Audit.Id, response: response }),
+                contentType: 'application/json',
+                headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(result) {
+                    if (result.success) {
+                        console.log('Response saved successfully');
+                    } else {
+                        console.error('Failed to save response:', result.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error saving response:', error);
+                }
+            });
+        }
+        
+        
+        // Changing comments on questions
+        $(document).on('click', '.save-comment', function() {
+            var questionId = $(this).closest('.question').data('question-id');
+            var comment = $(this).siblings('.comment-text').val();
+            saveQuestionComment(questionId, comment);
+        });
+        
+        function saveQuestionComment(questionId, comment) {
+            $.ajax({
+                url: '?handler=UpdateQuestionComment',
+                type: 'POST',
+                data: JSON.stringify({ questionId: questionId, auditId: @Model.Audit.Id, comment: comment }),
+                contentType: 'application/json',
+                headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(result) {
+                    if (result.success) {
+                        console.log('Comment saved successfully');
+                    } else {
+                        console.error('Failed to save comment:', result.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error saving comment:', error);
+                }
+            });
+        }
+        
+        
+        // Editing sections
+        $(document).on('click', '.edit-section', function (e){
+            e.preventDefault();
+            var sectionId = $(this).closest('.section').data('section-id');
+            var newText = prompt("Enter new section text:");
+            if (newText){
+                updateSection(sectionId, newText);
+            }
+        });
+        
+        function updateSection(sectionId, newName) {
+            $.ajax({
+                url: '?handler=UpdateSection',
+                type: 'POST',
+                data: JSON.stringify({ id: sectionId, name: newName }),
+                contentType: 'application/json',
+                headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(result) {
+                    if (result.success) {
+                        console.log('Section updated successfully');
+                    } else {
+                        console.error('Failed to update section');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating section:', error);
+                }
+            });
+        }
+        
+        //Editing questions
+        $(document).on('click', '.edit-question', function(e){
+            e.preventDefault();
+            var questionId = $(this).closest('.question').data('question-id');
+            var newText = prompt("Enter new question text:");
+            if (newText){
+                updateQuestion(questionId, newText);
+            }
+        });
+        
+        function updateQuestion(questionId, newText) {
+            $.ajax({
+                url: '?handler=UpdateQuestion',
+                type: 'POST',
+                data: JSON.stringify({ id: questionId, text: newText }),
+                contentType: 'application/json',
+                headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(result) {
+                    if (result.success) {
+                        console.log('Question updated successfully');
+                    } else {
+                        console.error('Failed to update question');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating question:', error);
+                }
+            });
+        }
+        
+        // Section List stuff (left hand side)
+        function generateSectionListHtml(sections) {
+            var html = '';
+            sections.forEach(function(section) {
+                html += `<li class='list-group-item' data-section-id='${section.id}'><span class='section-text'>${section.name}</span></li>`;
+            });
+            return html;
+        }
+        
+        $(document).on('click', '#sectionList li', function () {
+            var sectionId = $(this).data('section-id');
+
+            $('#sectionList li').removeClass('active');
+            $(this).addClass('active');
+
+            $.ajax({
+                url: '?handler=SectionDetails',
+                type: 'GET',
+                data: { sectionId: sectionId },
+                success: function (result) {
+                    if (result.sectionDetailsHtml) {
+                        $('#sectionDetails').html(result.sectionDetailsHtml);
+                    } else {
+                        console.error("No sectionDetailsHtml in result");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error loading section details:", error);
+                    alert('Failed to load section details. Please try again.');
+                }
+            });
+        });
+        
+        // Section Detail Stuff (right hand side)
+        function generateSectionDetailsHtml(section) {
+            var html = `<div class='section' data-section-id='${section.id}' data-audit-id='${section.auditId}'>
+            <div class='text-center mb-4'>
+                <h4 class='section-name'>${section.name}</h4>
+            </div>
+            <div class='questions'>`;
+
+            section.questions.forEach(function(question, index) {
+                html += generateQuestionHtml(question, index + 1);
+            });
+
+            html += `</div></div>`;
+            return html;
+        }
+
+        function generateQuestionHtml(question, questionNumber) {
+            var html = `<div class='question mb-3 pb-3 border-bottom' data-question-id='${question.id}'>
+            <div class='d-flex justify-content-between align-items-center'>
+                <h5 class='question-text mb-0'>${question.text}</h5>
+                <div>
+                    <a href='#' class='edit-question me-2'>Edit</a>
+                    <a href='#' class='delete-question'>Delete</a>
+                </div>
+            </div>`;
+
+            html += generateRadioButtons(question);
+            html += generateAttachmentAndCommentButtons();
+            html += generateCommentsAccordion();
+
+            html += `</div>`;
+            return html;
+        }
+
+        function generateRadioButtons(question) {
+            var options = ['Excellent', 'Good', 'RequiresImprovement', 'Poor', 'NotAssessed'];
+            var html = `<div class='response-options'>`;
+            options.forEach(function(option) {
+                var displayText = option === 'RequiresImprovement' ? 'Requires Improvement' :
+                    option === 'NotAssessed' ? 'Not Assessed' : option;
+                html += `<div class='form-check form-check-inline'>
+                <input class='form-check-input' type='radio' name='response-${question.id}' 
+                    id='response-${question.id}-${option}' value='${option}'>
+                <label class='form-check-label' for='response-${question.id}-${option}'>${displayText}</label>
+            </div>`;
+            });
+            html += `</div>`;
+            return html;
+        }
+
+        function generateAttachmentAndCommentButtons() {
+            return `<div class='mt-2 d-flex justify-content-end'>
+                            <button class='btn btn-secondary btn-sm attachments-btn me-2'>Attachments</button>
+                            <button class='btn btn-secondary btn-sm comments-btn'>Comments</button>
+                        </div>`;
+        }
+
+        function generateCommentsAccordion() {
+            return `<div class='comments-accordion mt-2' style='display: none;'>
+                            <div class='card'>
+                                <div class='card-body'>
+                                    <textarea class='form-control comment-text' rows='3'></textarea>
+                                    <button class='btn btn-primary btn-sm mt-2 save-comment'>Save</button>
+                                </div>
+                            </div>
+                        </div>`;
+        }
+    });
+</script>
+}

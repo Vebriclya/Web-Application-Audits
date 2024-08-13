@@ -1,4 +1,6 @@
-﻿namespace AuditApplication.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace AuditApplication.Models;
 
 public class Audit
 {
@@ -8,4 +10,5 @@ public class Audit
     public DateTime? CompletionDate { get; set; }
     public List<AuditSection> Sections { get; set; } = new List<AuditSection>();
     public List<QuestionResponse> QuestionResponses { get; set; } = new List<QuestionResponse>();
+    
 }

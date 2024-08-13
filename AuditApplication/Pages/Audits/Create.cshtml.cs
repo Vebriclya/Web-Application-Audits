@@ -63,7 +63,8 @@ namespace AuditApplication.Pages.Audits
                 var auditSection = new AuditSection
                 {
                     Name = templateSection.Name,
-                    Order = templateSection.Order
+                    Order = templateSection.Order,
+                    AuditId = audit.Id
                 };
 
                 foreach (var templateQuestion in templateSection.Questions)

@@ -25,7 +25,8 @@ namespace AuditApplication.Pages.Audits
 
         public async Task OnGetAsync()
         {
-            IQueryable<Audit> auditsQuery = _context.Audits;
+            // Little iffy on this include, remove it if it smells bad
+            IQueryable<Audit> auditsQuery = _context.Audits.Include(a => a.Sections);
 
             if (FilterOption == "Completed")
             {

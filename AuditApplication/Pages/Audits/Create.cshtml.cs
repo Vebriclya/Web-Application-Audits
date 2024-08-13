@@ -100,14 +100,16 @@ namespace AuditApplication.Pages.Audits
             AppendAuditTitle(sb, audit);
             
             // Create two-columns
-            sb.Append("<div class=\"row\">");
+            sb.Append("<div class='row'>");
+            sb.Append("<div class='col-md-4 vh-100'>");
             
             // Left column: Section list
             AppendSectionList(sb, audit.Sections);
+            sb.Append("</div>");
+            sb.Append("<div class='col-md-8 vh-100'>");
             
             // Right column: Section display
             AppendSectionDetails(sb, audit.Sections.FirstOrDefault());
-
             sb.Append("</div>");
             sb.Append("</div>");
             
@@ -144,8 +146,10 @@ namespace AuditApplication.Pages.Audits
             if (section != null)
             {
                 sb.AppendFormat("<div class='section' data-section-id='{0}'>", section.Id);
+                sb.Append("<div class='d-flex justify-content-between align-items-center'>");
                 sb.AppendFormat("<h4 class='section-name'>{0}</h4>", section.Name);
-                sb.Append("<a href='#' class='rename-section'>Rename</a>");
+                sb.Append("<a href='#' class='edit-section'>Edit</a>");
+                sb.Append("</div>");
                 sb.Append("<div class='questions'>");
 
                 foreach (var question in section.Questions)
@@ -157,15 +161,19 @@ namespace AuditApplication.Pages.Audits
                 sb.Append("<button class='btn btn-primary btn-sm mt-3 add-question'>Add Question</button>");
                 sb.Append("</div>");
             }
-            sb.Append("</div></div>");
+            sb.Append("</div>");
         }
         
         private void AppendQuestion(StringBuilder sb, AuditQuestion question)
         {
             sb.AppendFormat("<div class=\"question\" data-question-id=\"{0}\">", question.Id);
-            sb.AppendFormat("<p class=\"question-text\">{0}</p>", question.Text);
-            sb.Append("<a href=\"#\" class=\"rename-question\">Rename</a>");
+            sb.Append("<div class='d-flex justify-content-between align-items-center'>");
+            sb.AppendFormat("<p class=\"question-text mb-0\">{0}</p>", question.Text);
+            sb.Append("<div>");
+            sb.Append("<a href=\"#\" class=\"edit-question me-2\">Edit</a>");
             sb.Append("<a href=\"#\" class=\"delete-question\">Delete</a>");
+            sb.Append("</div>");
+            sb.Append("</div>");
             
             //Radio Buttons
             AppendRadioButtons(sb, question);
@@ -208,8 +216,8 @@ namespace AuditApplication.Pages.Audits
         private void AppendAttachmentAndCommentButtons(StringBuilder sb)
         {
             sb.Append(@"
-                <div class='mt-2'>
-                    <button class='btn btn-secondary btn-sm attachments-btn'>Attachments</button>
+                <div class='mt-2 d-flex justify-content-end'>
+                    <button class='btn btn-secondary btn-sm attachments-btn me-2'>Attachments</button>
                     <button class='btn btn-secondary btn-sm comments-btn'>Comments</button>
                 </div>
             "); 

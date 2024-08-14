@@ -80,8 +80,6 @@ namespace AuditApplication.Pages.Audits
 
         public async Task<IActionResult> OnGetSavedResponsesAsync(int id)
         {
-            Console.WriteLine("Attempting to load Saved Responses");
-            
             try
             {
 

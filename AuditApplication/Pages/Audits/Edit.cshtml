@@ -35,14 +35,10 @@
 {
     <script>
     $(document).ready(function () {
-        console.log("Entered document.ready, should show saved responses.");
-        
         $.ajax({
             url: '?handler=SavedResponses&id=@Model.Audit.Id',
             type: 'GET',
             success: function (result){
-                console.log("Call to SavedResponses inside Edit.cshtml was successful");
-                console.log(`Result is ${result}`);
                 if (result.success){
                     result.responses.forEach(function (response) {
                         var radioValue;
@@ -121,8 +117,6 @@
                 requestData.textAnswer = textAnswerInput.val();
             }
 
-            console.log('Saving response:', requestData);
-
             $.ajax({
                 url: '?handler=UpdateQuestionResponse',
                 type: 'POST',
@@ -132,9 +126,7 @@
                     "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
                 },
                 success: function(result) {
-                    console.log('Success response:', result);
                     if (result.success) {
-                        console.log('Response saved successfully');
                         $(`input[name='response-${questionId}'][value='${response}']`).prop('checked', true);
                     } else {
                         console.error('Failed to save response:', result.message);

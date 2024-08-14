@@ -6,18 +6,33 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AuditApplication.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSectionsQuestionsAndResponses : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Audits",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AuditName = table.Column<string>(type: "TEXT", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CompletionDate = table.Column<DateTime>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Audits", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "AuditTemplates",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -25,22 +40,45 @@ namespace AuditApplication.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Audits",
+                name: "AuditSections",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TemplateId = table.Column<int>(type: "INTEGER", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CompletionDate = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Order = table.Column<int>(type: "INTEGER", nullable: false),
+                    AuditId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Audits", x => x.Id);
+                    table.PrimaryKey("PK_AuditSections", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Audits_AuditTemplates_TemplateId",
-                        column: x => x.TemplateId,
-                        principalTable: "AuditTemplates",
+                        name: "FK_AuditSections_Audits_AuditId",
+                        column: x => x.AuditId,
+                        principalTable: "Audits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuestionResponses",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AuditId = table.Column<int>(type: "INTEGER", nullable: false),
+                    QuestionId = table.Column<int>(type: "INTEGER", nullable: false),
+                    RadioAnswer = table.Column<int>(type: "INTEGER", nullable: false),
+                    TextAnswer = table.Column<string>(type: "TEXT", nullable: true),
+                    AttachmentPath = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuestionResponses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QuestionResponses_Audits_AuditId",
+                        column: x => x.AuditId,
+                        principalTable: "Audits",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -52,6 +90,7 @@ namespace AuditApplication.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Order = table.Column<int>(type: "INTEGER", nullable: false),
                     AuditTemplateId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -66,12 +105,34 @@ namespace AuditApplication.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AuditQuestions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Text = table.Column<string>(type: "TEXT", nullable: false),
+                    Order = table.Column<int>(type: "INTEGER", nullable: false),
+                    AuditSectionId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuditQuestions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AuditQuestions_AuditSections_AuditSectionId",
+                        column: x => x.AuditSectionId,
+                        principalTable: "AuditSections",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Questions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Text = table.Column<string>(type: "TEXT", nullable: false),
+                    Order = table.Column<int>(type: "INTEGER", nullable: false),
                     SectionId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -85,49 +146,20 @@ namespace AuditApplication.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "QuestionResponses",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    AuditId = table.Column<int>(type: "INTEGER", nullable: false),
-                    QuestionId = table.Column<int>(type: "INTEGER", nullable: false),
-                    RadioAnswer = table.Column<int>(type: "INTEGER", nullable: false),
-                    TextAnswer = table.Column<string>(type: "TEXT", nullable: false),
-                    AttachmentPath = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_QuestionResponses", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_QuestionResponses_Audits_AuditId",
-                        column: x => x.AuditId,
-                        principalTable: "Audits",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_QuestionResponses_Questions_QuestionId",
-                        column: x => x.QuestionId,
-                        principalTable: "Questions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.CreateIndex(
+                name: "IX_AuditQuestions_AuditSectionId",
+                table: "AuditQuestions",
+                column: "AuditSectionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Audits_TemplateId",
-                table: "Audits",
-                column: "TemplateId");
+                name: "IX_AuditSections_AuditId",
+                table: "AuditSections",
+                column: "AuditId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_QuestionResponses_AuditId",
                 table: "QuestionResponses",
                 column: "AuditId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_QuestionResponses_QuestionId",
-                table: "QuestionResponses",
-                column: "QuestionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_SectionId",
@@ -144,16 +176,22 @@ namespace AuditApplication.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "QuestionResponses");
+                name: "AuditQuestions");
 
             migrationBuilder.DropTable(
-                name: "Audits");
+                name: "QuestionResponses");
 
             migrationBuilder.DropTable(
                 name: "Questions");
 
             migrationBuilder.DropTable(
+                name: "AuditSections");
+
+            migrationBuilder.DropTable(
                 name: "Sections");
+
+            migrationBuilder.DropTable(
+                name: "Audits");
 
             migrationBuilder.DropTable(
                 name: "AuditTemplates");

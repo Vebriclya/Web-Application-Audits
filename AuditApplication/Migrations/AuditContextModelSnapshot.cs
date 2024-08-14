@@ -148,8 +148,6 @@ namespace AuditApplication.Migrations
 
                     b.HasIndex("AuditId");
 
-                    b.HasIndex("QuestionId");
-
                     b.ToTable("QuestionResponses");
                 });
 
@@ -207,21 +205,11 @@ namespace AuditApplication.Migrations
 
             modelBuilder.Entity("AuditApplication.Models.QuestionResponse", b =>
                 {
-                    b.HasOne("AuditApplication.Models.Audit", "Audit")
+                    b.HasOne("AuditApplication.Models.Audit", null)
                         .WithMany("QuestionResponses")
                         .HasForeignKey("AuditId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("AuditApplication.Models.AuditQuestion", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Audit");
-
-                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("AuditApplication.Models.Section", b =>

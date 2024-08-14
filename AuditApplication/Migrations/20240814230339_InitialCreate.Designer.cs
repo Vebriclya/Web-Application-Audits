@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuditApplication.Migrations
 {
     [DbContext(typeof(AuditContext))]
-    [Migration("20240813040046_AddAuditSections")]
-    partial class AddAuditSections
+    [Migration("20240814230339_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -133,7 +133,6 @@ namespace AuditApplication.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("AttachmentPath")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("AuditId")
@@ -146,14 +145,11 @@ namespace AuditApplication.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("TextAnswer")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AuditId");
-
-                    b.HasIndex("QuestionId");
 
                     b.ToTable("QuestionResponses");
                 });
@@ -183,24 +179,20 @@ namespace AuditApplication.Migrations
 
             modelBuilder.Entity("AuditApplication.Models.AuditQuestion", b =>
                 {
-                    b.HasOne("AuditApplication.Models.AuditSection", "AuditSection")
+                    b.HasOne("AuditApplication.Models.AuditSection", null)
                         .WithMany("Questions")
                         .HasForeignKey("AuditSectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("AuditSection");
                 });
 
             modelBuilder.Entity("AuditApplication.Models.AuditSection", b =>
                 {
-                    b.HasOne("AuditApplication.Models.Audit", "Audit")
+                    b.HasOne("AuditApplication.Models.Audit", null)
                         .WithMany("Sections")
                         .HasForeignKey("AuditId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Audit");
                 });
 
             modelBuilder.Entity("AuditApplication.Models.Question", b =>
@@ -216,21 +208,11 @@ namespace AuditApplication.Migrations
 
             modelBuilder.Entity("AuditApplication.Models.QuestionResponse", b =>
                 {
-                    b.HasOne("AuditApplication.Models.Audit", "Audit")
+                    b.HasOne("AuditApplication.Models.Audit", null)
                         .WithMany("QuestionResponses")
                         .HasForeignKey("AuditId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("AuditApplication.Models.Question", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Audit");
-
-                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("AuditApplication.Models.Section", b =>

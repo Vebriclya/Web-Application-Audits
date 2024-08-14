@@ -28,11 +28,6 @@ namespace AuditApplication.Pages.Audits
         public async Task OnGetAsync()
         {
             AvailableTemplates = await _context.AuditTemplates.ToListAsync();
-            Console.WriteLine($"Number of templates loaded: {AvailableTemplates.Count}");
-            foreach (var template in AvailableTemplates)
-            {
-                Console.WriteLine($"Template ID: {template.Id}, Name: {template.Name}");
-            }
         }
 
         public async Task<IActionResult> OnPostCreateAuditFromTemplateAsync([FromBody] CreateAuditRequest request)

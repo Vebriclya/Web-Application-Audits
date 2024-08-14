@@ -87,7 +87,6 @@
                     type: 'GET',
                     data: { sectionId: sectionId },
                     success: function (result){
-                        console.log("Received result:", result);
                         if (result.sectionDetailsHtml){
                             $('#sectionDetails').html(result.sectionDetailsHtml);    
                         } else {

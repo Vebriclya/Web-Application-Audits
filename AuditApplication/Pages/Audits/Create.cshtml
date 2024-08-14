@@ -41,14 +41,10 @@
     <script>
         $(document).ready(function () {
             $('#beginAudit').click(function () {
-                console.log("BEGIN button clicked");
                 var $dropdown = $('#templateDropdown');
                 var templateId = parseInt($dropdown.val());
 
                 if (templateId){
-                    console.log("Template selected:", templateId);
-                    console.log("templateSelection element:", $('#templateSelection').length);
-                    console.log("Hiding templateSelection");
                     document.getElementById('templateSelection').style.cssText = 'display: none !important;';
                     $.ajax({
                         url: '?handler=CreateAuditFromTemplate',
@@ -60,9 +56,7 @@
                             "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
                         },
                         success: function (result){
-                            console.log("Ajax call successful");
                             if (result.success){
-                                console.log("Updating UI elements");
                                 $('#sectionList').html(result.sectionListHtml);
                                 $('#sectionDetails').html(result.sectionDetailsHtml).show();
                                 $('#auditTitle').text(result.auditName).show();
@@ -78,7 +72,6 @@
                         }
                     });
                 } else {
-                    console.log("No template selected");
                     alert('Please select a template.');
                 }
         });

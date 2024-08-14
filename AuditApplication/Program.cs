@@ -1,12 +1,14 @@
 using AuditApplication.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<AuditContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("AuditContext")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("AuditContext"))
+        .EnableSensitiveDataLogging());
 builder.Logging.ClearProviders();
 builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
 builder.Logging.AddConsole();

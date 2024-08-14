@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using AuditApplication.Data;
 using AuditApplication.Models;
 using System.Text;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 
 
@@ -29,8 +30,11 @@ namespace AuditApplication.Pages.Audits
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
+            Console.WriteLine("Entered OnGet");
+            Console.WriteLine($"Request Path: {Request.Path}, Query String: {Request.QueryString}");
             if (id == null)
             {
+                Console.WriteLine("id is null");
                 return NotFound();
             }
 
@@ -41,25 +45,57 @@ namespace AuditApplication.Pages.Audits
 
             if (Audit == null)
             {
+                Console.WriteLine("Audit is null");
                 return NotFound();
             }
+            
+            Console.WriteLine($"Audit Id: {Audit.Id}");
+            
+            //return Page();
 
-            return Page();
-        }
-        
-        public async Task<IActionResult> OnGetSavedResponsesAsync()
-        {
+            
+            Console.WriteLine($"Audit Id: {Audit.Id}");
+
+            Console.WriteLine($"Attempting to load saved resposes...");
+
             try
             {
+                var query = _context.QuestionResponses.Where(qr => qr.AuditId == Audit.Id);
+                var selectedData = query.Select(qr => new { qr.QuestionId, qr.RadioAnswer, qr.TextAnswer });
+                var responses = await selectedData.ToListAsync();
+
+                ViewData["Responses"] = responses;
+                
+
+                return Page();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new JsonResult(new { success = false, error = ex.Message, stackTrace = ex.StackTrace });
+            }
+        }
+        
+
+        public async Task<IActionResult> OnGetSavedResponsesAsync(int id)
+        {
+            Console.WriteLine("Attempting to load Saved Responses");
+            
+            try
+            {
+
                 var responses = await _context.QuestionResponses
-                    .Where(qr => qr.AuditId == Audit.Id)
+                    .Where(qr => qr.AuditId == id)
                     .Select(qr => new { qr.QuestionId, qr.RadioAnswer, qr.TextAnswer })
                     .ToListAsync();
-
+                
                 return new JsonResult(new { success = true, responses });
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return new JsonResult(new { success = false, error = ex.Message, stackTrace = ex.StackTrace });
             }
         }

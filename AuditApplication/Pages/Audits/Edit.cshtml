@@ -35,6 +35,39 @@
 {
     <script>
     $(document).ready(function () {
+        console.log("Entered document.ready, should show saved responses.");
+        
+        $.ajax({
+            url: '?handler=SavedResponses&id=@Model.Audit.Id',
+            type: 'GET',
+            success: function (result){
+                console.log("Call to SavedResponses inside Edit.cshtml was successful");
+                console.log(`Result is ${result}`);
+                if (result.success){
+                    result.responses.forEach(function (response) {
+                        var radioValue;
+                        switch (response.radioAnswer) {
+                            case 100: radioValue = 'Excellent'; break;
+                            case 75: radioValue = 'Good'; break;
+                            case 50: radioValue = 'RequiresImprovement'; break;
+                            case 25: radioValue = 'Poor'; break;
+                            case 0: radioValue = 'NotAssessed'; break;
+                        }
+                        $(`input[name='response-${response.questionId}'][value='${radioValue}']`).prop('checked', true);
+                        
+                        if (response.textAnswer){
+                            $(`#textAnswer-${response.questionId}`).val(response.textAnswer);
+                        }
+                    });
+                } else {
+                    console.error("Error in the response:", result.error);
+                }
+            },
+            error: function (xhr, status, error){
+                console.error('Error loading saved responses:', error);
+            }
+        });
+        
         var auditData = @Json.Serialize(new
                         {
                             id = Model.Audit.Id,
@@ -316,7 +349,7 @@
                 var checked = question.response === option ? 'checked' : '';
                 html += `<div class='form-check form-check-inline'>
                 <input class='form-check-input' type='radio' name='response-${question.id}' 
-                    id='response-${question.id}-${option}' value='${option}' ${checked}>
+                    id='response-${question.id}-${option}' value='${option}' data-question-id='${question.Id}'>
                 <label class='form-check-label' for='response-${question.id}-${option}'>${displayText}</label>
             </div>`;
             });
@@ -349,37 +382,7 @@
         $(document).on('click', '.attachments-btn', function() {
             alert('Attachment functionality coming soon!');
         });
-
-        $(document).ready(function() {
-            // Fetch saved responses and update UI
-            $.ajax({
-                url: '?handler=SavedResponses',
-                type: 'GET',
-                success: function(result) {
-                    if (result.success) {
-                        result.responses.forEach(function(response) {
-                            var radioValue;
-                            switch(response.radioAnswer) {
-                                case 100: radioValue = 'Excellent'; break;
-                                case 75: radioValue = 'Good'; break;
-                                case 50: radioValue = 'RequiresImprovement'; break;
-                                case 25: radioValue = 'Poor'; break;
-                                case 0: radioValue = 'NotAssessed'; break;
-                            }
-                            $(`input[name='response-${response.questionId}'][value='${radioValue}']`).prop('checked', true);
-
-                            // If you have text inputs for answers, update those too
-                            if (response.textAnswer) {
-                                $(`#textAnswer-${response.questionId}`).val(response.textAnswer);
-                            }
-                        });
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error loading saved responses:', error);
-                }
-            });
-        });
+        
     });
 </script>
 }

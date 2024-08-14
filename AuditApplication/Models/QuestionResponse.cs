@@ -14,7 +14,7 @@ public class QuestionResponse
 
 public enum RadioResponse
 {
-    Excellent = 0,
+    Excellent = 100,
     Good = 75,
     RequiresImprovement = 50,
     Poor = 25,

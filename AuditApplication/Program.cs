@@ -7,8 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<AuditContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("AuditContext"))
-        .EnableSensitiveDataLogging());
+    options.UseSqlite(builder.Configuration.GetConnectionString("AuditContext")));
 builder.Logging.ClearProviders();
 builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
 builder.Logging.AddConsole();

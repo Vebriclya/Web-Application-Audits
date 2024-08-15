@@ -10,6 +10,7 @@ using AuditApplication.Models;
 
 namespace AuditApplication.Pages.Audits
 {
+    [ValidateAntiForgeryToken]
     public class IndexModel : PageModel
     {
         private readonly AuditApplication.Data.AuditContext _context;
@@ -38,6 +39,33 @@ namespace AuditApplication.Pages.Audits
             }
 
             Audits = await auditsQuery.ToListAsync();
+        }
+
+        public async Task<IActionResult> OnPostDeleteAuditAsync(int id)
+        {
+            try
+            {
+                var audit = await _context.Audits
+                    .Include(a => a.Sections)
+                    .ThenInclude(s => s.Questions)
+                    .Include(a => a.QuestionResponses)
+                    .FirstOrDefaultAsync(a => a.Id == id);
+                
+                if (audit!= null)
+                {
+                    _context.AuditQuestions.RemoveRange(audit.Sections.SelectMany(s => s.Questions));
+                    _context.AuditSections.RemoveRange(audit.Sections);
+                    _context.QuestionResponses.RemoveRange(audit.QuestionResponses);
+                    _context.Audits.Remove(audit);
+                    await _context.SaveChangesAsync();
+                }
+                return new JsonResult(new { success = true, message = "Audit deleted successfully!" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new JsonResult(new { success = false, message = ex.Message });
+            }
         }
     }
 }

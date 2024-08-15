@@ -113,7 +113,7 @@
             console.log(`Selected value = ${chosenOption} for question ${questionId}`);
             
             $.ajax({
-                url: '?handler=SaveChoice',
+                url: '?handler=SaveRadio',
                 type: 'POST',
                 data: JSON.stringify({ 
                     RadioAnswer: chosenOption, 

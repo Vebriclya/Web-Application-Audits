@@ -222,7 +222,7 @@ namespace AuditApplication.Pages.Audits
             });
         }
 
-        public async Task<IActionResult> OnPostSaveChoiceAsync([FromBody] RadioChoice choice)
+        public async Task<IActionResult> OnPostSaveRadioAsync([FromBody] RadioChoice choice)
         {
             Console.WriteLine($"RadioAnswer: {choice.RadioAnswer}, Question Id: {choice.QuestionId}");
             if (choice == null) 

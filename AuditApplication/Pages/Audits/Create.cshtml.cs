@@ -103,7 +103,7 @@ namespace AuditApplication.Pages.Audits
             }
             return sb.ToString();
         }
-
+        
         private string GenerateSectionDetailsHtml(AuditSection section)
         {
             var sb = new StringBuilder();

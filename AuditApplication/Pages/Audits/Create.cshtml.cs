@@ -173,7 +173,7 @@ namespace AuditApplication.Pages.Audits
                 sb.AppendFormat(@"
                     <div class='form-check form-check-inline'>
                         <input class='form-check-input' type='radio' name='response-{0}' 
-                            id='response-{0}-{1}' value='{1}'>
+                            id='response-{0}-{1}' value='{1}' onchange='saveChoice(this, {0})'>
                         <label class='form-check-label' for='response-{0}-{1}'>{2}</label>
                     </div>
                 ", question.Id, option, displayText);
@@ -220,6 +220,41 @@ namespace AuditApplication.Pages.Audits
             {
                 sectionDetailsHtml = GenerateSectionDetailsHtml(section)
             });
+        }
+
+        public async Task<IActionResult> OnPostSaveChoiceAsync([FromBody] int radioAnswer, int questionId)
+        {
+            Console.WriteLine($"Radio Answer: {radioAnswer}, Question Id: {questionId}");
+            
+            try
+            {
+                RadioResponse parsedResponse = (RadioResponse)radioAnswer;
+                
+                var response = await _context.QuestionResponses.FirstOrDefaultAsync(x => x.QuestionId == questionId);
+                if (response != null)
+                {
+                    response.RadioAnswer = parsedResponse;
+                    _context.QuestionResponses.Update(response);
+                }
+                else
+                {
+                    var newResponse = new QuestionResponse
+                    {
+                        QuestionId = questionId,
+                        RadioAnswer = parsedResponse
+                    };
+                    _context.QuestionResponses.Add(newResponse);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return new JsonResult(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new JsonResult(new { success = false, message = ex.Message });
+            }
         }
         
     }

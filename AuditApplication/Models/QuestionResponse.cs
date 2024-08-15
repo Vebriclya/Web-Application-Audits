@@ -3,7 +3,6 @@
 public class QuestionResponse
 {
     public int Id { get; set; }
-    public int AuditId { get; set; }
     public int QuestionId { get; set; }
     public RadioResponse RadioAnswer { get; set; }
     public string? TextAnswer { get; set; }

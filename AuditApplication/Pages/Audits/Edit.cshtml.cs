@@ -30,11 +30,8 @@ namespace AuditApplication.Pages.Audits
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            Console.WriteLine("Entered OnGet");
-            Console.WriteLine($"Request Path: {Request.Path}, Query String: {Request.QueryString}");
             if (id == null)
             {
-                Console.WriteLine("id is null");
                 return NotFound();
             }
 
@@ -48,22 +45,20 @@ namespace AuditApplication.Pages.Audits
                 Console.WriteLine("Audit is null");
                 return NotFound();
             }
-            
             Console.WriteLine($"Audit Id: {Audit.Id}");
-            
-            //return Page();
-
-            
-            Console.WriteLine($"Audit Id: {Audit.Id}");
-
             Console.WriteLine($"Attempting to load saved resposes...");
 
             try
             {
-                var query = _context.QuestionResponses.Where(qr => qr.AuditId == Audit.Id);
-                var selectedData = query.Select(qr => new { qr.QuestionId, qr.RadioAnswer, qr.TextAnswer });
-                var responses = await selectedData.ToListAsync();
-
+                var questionIds = Audit.Sections
+                    .SelectMany(s => s.Questions)
+                    .Select(q => q.Id)
+                    .ToList();
+                var responses = await _context.QuestionResponses
+                    .Where(qr => questionIds.Contains(qr.QuestionId))
+                    .Select(qr => new { qr.QuestionId, qr.RadioAnswer, qr.TextAnswer })
+                    .ToListAsync();
+                
                 ViewData["Responses"] = responses;
                 
 
@@ -83,8 +78,23 @@ namespace AuditApplication.Pages.Audits
             try
             {
 
+                var audit = await _context.Audits
+                    .Include(a => a.Sections)
+                    .ThenInclude(s => s.Questions)
+                    .FirstOrDefaultAsync(a => a.Id == id);
+
+                if (audit == null)
+                {
+                    return new JsonResult(new { success = false, error = "Audit not found" });
+                }
+                
+                var questionIds = audit.Sections
+                    .SelectMany(s => s.Questions)
+                    .Select(q => q.Id)
+                    .ToList();
+                
                 var responses = await _context.QuestionResponses
-                    .Where(qr => qr.AuditId == id)
+                    .Where(qr => questionIds.Contains(qr.QuestionId))
                     .Select(qr => new { qr.QuestionId, qr.RadioAnswer, qr.TextAnswer })
                     .ToListAsync();
                 
@@ -231,14 +241,13 @@ namespace AuditApplication.Pages.Audits
                 }
 
                 var response = await _context.QuestionResponses
-                    .FirstOrDefaultAsync(qr => qr.QuestionId == request.QuestionId && qr.AuditId == request.AuditId);
+                    .FirstOrDefaultAsync(qr => qr.QuestionId == request.QuestionId);
 
                 if (response == null)
                 {
                     response = new QuestionResponse 
                     { 
                         QuestionId = request.QuestionId, 
-                        AuditId = request.AuditId,
                         RadioAnswer = (RadioResponse)request.Response,
                         TextAnswer = request.TextAnswer
                     };

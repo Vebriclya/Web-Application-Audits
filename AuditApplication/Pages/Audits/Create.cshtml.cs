@@ -222,30 +222,43 @@ namespace AuditApplication.Pages.Audits
             });
         }
 
-        public async Task<IActionResult> OnPostSaveChoiceAsync([FromBody] int radioAnswer, int questionId)
+        public async Task<IActionResult> OnPostSaveChoiceAsync([FromBody] RadioChoice choice)
         {
-            Console.WriteLine($"Radio Answer: {radioAnswer}, Question Id: {questionId}");
-            
+            Console.WriteLine($"RadioAnswer: {choice.RadioAnswer}, Question Id: {choice.QuestionId}");
+            if (choice == null) 
+            {
+                Console.WriteLine("Null chosen");
+                return new JsonResult(new { success = false, message = "Choice cannot be null." });
+            }
+
+            Console.WriteLine($"Radio Answer: {choice.RadioAnswer}, Question Id: {choice.QuestionId}");
+
             try
             {
-                RadioResponse parsedResponse = (RadioResponse)radioAnswer;
-                
-                var response = await _context.QuestionResponses.FirstOrDefaultAsync(x => x.QuestionId == questionId);
-                if (response != null)
-                {
-                    response.RadioAnswer = parsedResponse;
-                    _context.QuestionResponses.Update(response);
-                }
-                else
-                {
-                    var newResponse = new QuestionResponse
-                    {
-                        QuestionId = questionId,
-                        RadioAnswer = parsedResponse
-                    };
-                    _context.QuestionResponses.Add(newResponse);
-                }
+                RadioResponse parsedResponse;
 
+                if (Enum.TryParse(choice.RadioAnswer, true, out parsedResponse))
+                {
+                    Console.WriteLine($"Parsed response: {parsedResponse}");
+                    var response = await _context.QuestionResponses
+                        .FirstOrDefaultAsync(x => x.QuestionId == choice.QuestionId);
+                    Console.WriteLine($"Response is: {response}");
+                    if (response != null)
+                    {
+                        response.RadioAnswer = parsedResponse;
+                        _context.QuestionResponses.Update(response);
+                    }
+                    else
+                    {
+                        var newResponse = new QuestionResponse
+                        {
+                            QuestionId = choice.QuestionId,
+                            RadioAnswer = parsedResponse
+                        };
+                        _context.QuestionResponses.Add(newResponse);
+                    }
+                }
+                
                 await _context.SaveChangesAsync();
 
                 return new JsonResult(new { success = true });
@@ -255,6 +268,12 @@ namespace AuditApplication.Pages.Audits
                 Console.WriteLine(ex.Message);
                 return new JsonResult(new { success = false, message = ex.Message });
             }
+        }
+        
+        public class RadioChoice
+        {
+            public string RadioAnswer { get; set; }
+            public int QuestionId { get; set; }
         }
         
     }

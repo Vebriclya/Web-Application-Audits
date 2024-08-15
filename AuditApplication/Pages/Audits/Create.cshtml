@@ -110,13 +110,15 @@
     
         function saveChoice(clickedRadioButton, questionId) {
             var chosenOption = clickedRadioButton.value;
+            console.log(`Selected value = ${chosenOption} for question ${questionId}`);
             
             $.ajax({
                 url: '?handler=SaveChoice',
                 type: 'POST',
-                data: { 
-                    chosenOption: chosenOption, 
-                    questionId: questionId},
+                data: JSON.stringify({ 
+                    RadioAnswer: chosenOption, 
+                    QuestionId: questionId}),
+                contentType: 'application/json',
                 headers: {
                     "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
                 },

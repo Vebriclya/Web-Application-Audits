@@ -205,21 +205,19 @@ namespace AuditApplication.Pages.Audits
             ");
         }
 
-        public IActionResult OnGetSectionDetails(int sectionId)
+        public async Task<IActionResult> OnGetSectionDetailsAsync (int sectionId)
         {
-            var section = _context.AuditSections
+            var section = await _context.AuditSections
                 .Include(s => s.Questions)
-                .FirstOrDefault(s => s.Id == sectionId);
+                .FirstOrDefaultAsync(s => s.Id == sectionId);
 
             if (section == null)
             {
                 return NotFound();
             }
 
-            return new JsonResult(new
-            {
-                sectionDetailsHtml = GenerateSectionDetailsHtml(section)
-            });
+            var sectionDetailsHtml = GenerateSectionDetailsHtml(section);
+            return new JsonResult(new { sectionDetailsHtml });
         }
 
         public async Task<IActionResult> OnPostSaveRadioAsync([FromBody] RadioChoice choice)

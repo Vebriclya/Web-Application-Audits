@@ -64,6 +64,7 @@
                                 $('#sectionList').html(result.sectionListHtml);
                                 $('#sectionDetails').html(result.sectionDetailsHtml).show();
                                 $('#auditTitle').text(result.auditName).show();
+                                getSavedResponse();
                             } else {
                                 console.error("Failed to create audit:", result.message);
                                 alert('Failed to create audit: ' + (result.message || "Please try again."));
@@ -91,10 +92,11 @@
                 $.ajax({
                     url: '?handler=SectionDetails',
                     type: 'GET',
-                    data: { sectionId: sectionId },
+                    data: { sectionId: sectionId, auditId: currentAuditId },
                     success: function (result){
                         if (result.sectionDetailsHtml){
-                            $('#sectionDetails').html(result.sectionDetailsHtml);    
+                            $('#sectionDetails').html(result.sectionDetailsHtml); 
+                            getSavedResponse();   
                         } else {
                             console.error("No sectionDetailsHtml in result");
                         }
@@ -130,6 +132,48 @@
                     alert('An error occurred. Please try again.');
                 }
             });
+        }
+        
+        function getSavedResponse(){
+            if (currentAuditId === null){
+                console.error("Audit id is not yet set. Audit might not have been created.");
+                return;
+            }
+        
+            $.ajax({
+                url: '?handler=SavedResponses&id=' + currentAuditId,
+                type: 'GET',
+                dataType: 'json',
+                headers:{
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (result) {
+                    console.log("Received response:", result);
+                    if (result.success) {
+                        result.responses.forEach(function (response) {
+                            var radioValue;
+                            switch (response.radioAnswer){
+                                case 100: radioValue = "Excellent"; break;
+                                case 75: radioValue = "Good"; break;
+                                case 50: radioValue = "RequiresImprovement"; break;
+                                case 25: radioValue = "Poor"; break;
+                                case 0: radioValue = "NotAssessed"; break;
+                            }
+                            $(`input[name='response-${response.questionId}'][value='${radioValue}']`).prop('checked', true);
+                            
+                            if (response.textAnswer) {
+                                $(`#textAnswer-${response.questionId}`).val(response.textAnswer);
+                            }
+                        });
+                    } else {
+                        console.error("Error in response:", result.error);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error loading saved responses, Ajax error:", error);
+                    console.error("Response text:", xhr.responseText);  
+                }
+        });
         }
         
     </script>

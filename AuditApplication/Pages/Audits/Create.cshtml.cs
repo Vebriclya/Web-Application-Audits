@@ -91,6 +91,7 @@ namespace AuditApplication.Pages.Audits
 
             return new JsonResult(new { 
                 success = true, 
+                auditId = audit.Id,
                 auditName = audit.AuditName,
                 sectionListHtml = sectionListHtml, 
                 sectionDetailsHtml = sectionDetailsHtml 
@@ -281,6 +282,42 @@ namespace AuditApplication.Pages.Audits
         {
             public string RadioAnswer { get; set; }
             public int QuestionId { get; set; }
+        }
+        
+        // THIS IS WHERE YOU ARE CURRENTLY WORKING 
+        public async Task<IActionResult> OnGetSavedResponsesAsync(int id)
+        {
+            try
+            {
+
+                var audit = await _context.Audits
+                    .Include(a => a.Sections)
+                    .ThenInclude(s => s.Questions)
+                    .FirstOrDefaultAsync(a => a.Id == id);
+
+                if (audit == null)
+                {
+                    return new JsonResult(new { success = false, error = "Audit not found" });
+                }
+                
+                var questionIds = audit.Sections
+                    .SelectMany(s => s.Questions)
+                    .Select(q => q.Id)
+                    .ToList();
+                
+                var responses = await _context.QuestionResponses
+                    .Where(qr => questionIds.Contains(qr.QuestionId))
+                    .Select(qr => new { qr.QuestionId, qr.RadioAnswer, qr.TextAnswer })
+                    .ToListAsync();
+                
+                return new JsonResult(new { success = true, responses = responses });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new JsonResult(new { success = false, error = ex.Message });
+            }
         }
         
     }

@@ -28,6 +28,15 @@ namespace AuditApplication.Pages.Audits
         [BindProperty]
         public Audit Audit { get; set; }
 
+        private readonly RadioResponse[] responseOrder = new[]
+        {
+            RadioResponse.Excellent,
+            RadioResponse.Good,
+            RadioResponse.RequiresImprovement,
+            RadioResponse.Poor,
+            RadioResponse.NotAssessed
+        };
+
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
@@ -357,7 +366,7 @@ namespace AuditApplication.Pages.Audits
 
                 // Radio buttons
                 sb.Append("<div class='response-options'>");
-                foreach (RadioResponse option in Enum.GetValues(typeof(RadioResponse)))
+                foreach (var option in responseOrder)
                 {
                     string displayText = option.ToString();
                     if (displayText == "RequiresImprovement") displayText = "Requires Improvement";

@@ -24,6 +24,15 @@ namespace AuditApplication.Pages.Audits
         }
         
         public List<AuditTemplate> AvailableTemplates { get;set; }
+        
+        private readonly RadioResponse[] responseOrder = new[]
+        {
+            RadioResponse.Excellent,
+            RadioResponse.Good,
+            RadioResponse.RequiresImprovement,
+            RadioResponse.Poor,
+            RadioResponse.NotAssessed
+        };
 
         public async Task OnGetAsync()
         {
@@ -158,7 +167,7 @@ namespace AuditApplication.Pages.Audits
         private void AppendRadioButtons(StringBuilder sb, AuditQuestion question)
         {
             sb.Append("<div class='response-options'>");
-            foreach (var option in Enum.GetValues(typeof(RadioResponse)))
+            foreach (var option in responseOrder)
             {
                 string displayText = option.ToString();
                 if (displayText == "RequiresImprovement")
